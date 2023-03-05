@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+{% extends "ChessChannelsApp/base.html" %}
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    {% block styles %}
+    <link href="{% static 'ChessChannelsApp/css/styles.css' %}" rel="stylesheet">
+    {% endblock styles %}
+
+
+
+</head>
+<body>
+    {% block main_content %}
+    <div style="color: white; font-size: 30px; padding-top: 20px;">
+        {% if request.user.is_authenticated %}
+            {% if user.username == profile_username %}
+            <div style="color: white; font-size: 30px; padding-top: 20px;">
+                You are the owner of this username: {{user.username}}
+            </div>
+            {% else %}
+            <div style="color: white; font-size: 30px; padding-top: 20px;">
+                You are the viewer of this username: {{profile_username}}
+            </div>
+            {% endif %}
+        {% else %}
+        <div style="color: white; font-size: 30px; padding-top: 20px;">
+            You are not authenticated.
+        </div>
+        {% endif %}
+    </div>
+
+    {% endblock main_content %}
+
+    {% block after_body_scripts %}
+
+    {% endblock after_body_scripts %}
+
+
+</body>
+</html>

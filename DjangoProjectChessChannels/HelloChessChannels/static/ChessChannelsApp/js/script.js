@@ -1,0 +1,1 @@
+console.log("{{title}}"); // try to use templates

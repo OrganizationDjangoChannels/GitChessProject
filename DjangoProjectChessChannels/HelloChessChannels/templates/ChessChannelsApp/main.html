@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+{% extends "ChessChannelsApp/base.html" %}
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    {% block styles %}
+    <link href="{% static 'ChessChannelsApp/css/styles.css' %}" rel="stylesheet">
+    <style>
+        .just_play_button{
+            padding: 20px 30px 20px 30px;
+            color: white;
+            font-size: 20px;
+            background-color: green;
+            border-radius: 12px;
+            max-width: 100px;
+            user-select: none;
+
+        }
+        /*.just_play_button:active{*/
+        /*    background-color: darkblue;*/
+        /*}*/
+        .just_play_button:hover{
+            color: #fbff00;
+        }
+    </style>
+    {% endblock styles %}
+
+
+
+</head>
+<body>
+    {% block main_content %}
+    <div style="color: white; font-size: 30px; padding-top: 20px;">
+        There will be content...
+    </div>
+
+    <div style="padding: 20px 20px 20px 20px;">
+        <div class="just_play_button" id="5_plus_3">
+            PLAY 5+3
+        </div>
+    </div>
+
+    <div style="padding: 20px 20px 20px 20px;">
+        <div class="just_play_button" id="3_plus_2">
+            PLAY 3+2
+        </div>
+    </div>
+
+    <div style="padding: 20px 20px 20px 20px;">
+        <div class="just_play_button" id="1_plus_1">
+            PLAY 1+1
+        </div>
+    </div>
+
+    <div style="padding: 20px 20px 20px 20px;">
+        <div class="just_play_button" id="3_plus_0">
+            PLAY 3+0
+        </div>
+    </div>
+
+    <div style="padding: 20px 20px 20px 20px;">
+        <div class="just_play_button" id="5_plus_0">
+            PLAY 5+0
+        </div>
+    </div>
+
+
+    {% endblock main_content %}
+
+
+
+    {% block after_body_scripts %}
+
+    <script>
+        let authenticated = ("{{request.user.is_authenticated}}" === "True")
+        let username = "{{user.username}}";
+
+        const MatchmakingSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/socket-server/main/'
+        );
+
+        MatchmakingSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            console.log(`onmessage_print ${data.message}`);
+
+            if (data.type === 'matchmaking'){
+                console.log(`matchmaking ${data.username} to ${data.room}`);
+                if (username === data.username){
+                    // console.log(`matchmaking ${data.username} to ${data.room}`);
+
+                    window.location.replace(`/play/${data.room}`);
+                }
+
+
+            }
+        };
+
+        MatchmakingSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        let matchmaking_buttons = [];
+
+
+        let buttons_nodelist = document.querySelectorAll("div.just_play_button")
+        for (let i = 0; i < buttons_nodelist.length; i++){
+            matchmaking_buttons.push(buttons_nodelist[i])
+        }
+
+        for (let i = 0; i < matchmaking_buttons.length; i++){
+            matchmaking_buttons[i].onclick = send_time_control;
+            matchmaking_buttons[i].setAttribute('clicked_once', 'false');
+        }
+
+        let chosen_time_control = false; // one of time control buttons if clicked
+
+        function send_time_control(){
+            if (authenticated){
+                let message = this.innerText.split(' ')[1]; // only time control e.g "3+2" from ("Play 3+2")
+                if (this.getAttribute('clicked_once') === 'false'){
+                    if (!chosen_time_control){
+                        this.setAttribute('clicked_once', 'true');
+                        this.style.backgroundColor = 'darkblue';
+                        chosen_time_control = true;
+
+                        MatchmakingSocket.send(JSON.stringify({
+                            'searching': 1,
+                            'message': message,
+                            'username': "{{user.username}}",
+                        }))
+
+                        for (let i = 0; i < matchmaking_buttons.length; i++){
+                            if (matchmaking_buttons[i].id !== this.id){
+                                matchmaking_buttons[i].style.backgroundColor = 'grey';
+                            }
+                        }
+                    }
+
+                }else{
+                    chosen_time_control = false;
+                    this.setAttribute('clicked_once', 'false');
+                    // this.style.backgroundColor = 'green';
+                    for (let i = 0; i < matchmaking_buttons.length; i++){
+                        matchmaking_buttons[i].style.backgroundColor = 'green';
+                    }
+                    MatchmakingSocket.send(JSON.stringify({
+                        'searching': 0,
+                        'message': message,
+                        'username': "{{user.username}}",
+                    }))
+
+                }
+
+
+            }else{
+                window.location.replace("{% url 'login' %}");  // redirect to login page
+            }
+        }
+
+
+
+        if (authenticated){
+            console.log("{{user.username}}");
+            console.log("{{user.id}}");
+            console.log("{{user.password}}");
+        }else{
+            console.log("unauthenticated")
+        }
+
+
+    </script>
+    {% endblock after_body_scripts %}
+
+
+</body>
+</html>

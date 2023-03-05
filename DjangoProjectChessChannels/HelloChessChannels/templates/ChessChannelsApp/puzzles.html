@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+{% extends "ChessChannelsApp/base.html" %}
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+</head>
+<body>
+  {% block main_content %}
+    <div>
+        <a href="{% url 'home' %}">Return on main.html</a>
+    </div>
+    <div>Ratings</div>
+  {% endblock main_content %}
+</body>
+</html>

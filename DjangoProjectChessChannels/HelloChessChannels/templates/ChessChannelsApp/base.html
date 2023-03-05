@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    {% block styles %}
+    <link href="{% static 'ChessChannelsApp/css/styles.css' %}" rel="stylesheet">
+    <link href="{% static 'ChessChannelsApp/css/animations.css' %}" rel="stylesheet">
+    {% endblock styles %}
+    {% block before_body_scripts %}
+
+    {% endblock before_body_scripts %}
+</head>
+<body>
+    {% block header %}
+    <header class="pageHeader">
+        <a href="{% url 'home' %}" class="Logo">
+            <img src="{% static 'ChessChannelsApp/images/Fidelogo.png' %}" alt="alternative text" id="img-logo">
+        </a>
+
+        <ul class="headerActionsList" id="header_main_actions">
+                <li class="headerActionsElement">
+                    <a href="{% url 'play' %}" class="headerLinkElement" style="text-decoration: none;">play</a>
+                </li>
+                <li class="headerActionsElement">
+                    <a href="{% url 'puzzles' %}" class="headerLinkElement" style="text-decoration: none;">puzzles</a>
+                </li>
+                <li class="headerActionsElement">
+                    <a href="{% url 'ratings' %}" class="headerLinkElement" style="text-decoration: none;">ratings</a>
+                </li>
+        </ul>
+
+        <ul class="headerActionsList" id="header_authentication">
+            {% if request.user.is_authenticated %}
+            <li class="headerActionsElement">
+                <a href="/profile/{{user.username}}" class="headerLinkElement" style="text-decoration: none;" id="username">{{user.username}}</a>
+            </li>
+            <li class="headerActionsElement">
+                <a href="{% url 'logout' %}" class="headerLinkElement" style="text-decoration: none;">log out</a>
+            </li>
+            {% else %}
+            <li class="headerActionsElement">
+                <a href="{% url 'login' %}" class="headerLinkElement" style="text-decoration: none;">log in</a>
+            </li>
+            <li class="headerActionsElement">
+                <a href="{% url 'register' %}" class="headerLinkElement" style="text-decoration: none;">register</a>
+            </li>
+            {% endif %}
+        </ul>
+
+    </header>
+    {% endblock header %}
+
+    {% block main_content %}
+
+    {% endblock main_content %}
+
+
+    {% block after_body_scripts %}
+
+    {% endblock after_body_scripts %}
+
+
+
+</body>
+</html>

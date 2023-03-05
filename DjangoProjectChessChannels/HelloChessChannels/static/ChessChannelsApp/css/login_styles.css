@@ -1,0 +1,131 @@
+@keyframes gradient {
+	0% {
+		background-position: 0 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0 50%;
+	}
+}
+
+body{
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-size: 20px;
+    font-family: "Roboto", "Lucida Grande", Verdana, Arial, sans-serif;
+    background: url("../images/background.jpg") no-repeat #1b1b1c;
+}
+
+.pageHeader{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    /*background-color: yellow;*/
+    height: auto;
+
+
+}
+
+
+.headerActionsElement{
+    list-style-type: none;
+    display: inline;
+    padding-left: 30px;
+    padding-right: 30px;
+
+
+}
+
+.headerActionsList{
+    line-height: 65px;  /* magic */
+}
+.headerLinkElement{
+    text-decoration: none;
+    color: #cfcef2;
+}
+
+.headerLinkElement:hover{
+    color: #fbff00;
+}
+
+
+#img-logo{
+    max-width: 90px;
+    max-height: 60px;
+    width: auto;
+    height: auto;
+
+}
+
+
+.user_card {
+    width: 400px;
+    height: 400px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin: -150px 0 0 -200px;
+
+
+    background: linear-gradient(-45deg, #e76e36, #f675b6, #00d783, #61c74d);
+	background-size: 400% 400%;
+	animation: gradient 15s ease infinite;
+
+    -webkit-box-shadow: 0 0 25px 5px rgba(34, 60, 80, 0.3);
+    -moz-box-shadow: 0 0 25px 5px rgba(34, 60, 80, 0.3);
+    box-shadow: 0 0 25px 5px rgba(34, 60, 80, 0.3);
+
+
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    padding: 10px;
+    /*box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    -webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    -moz-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);*/
+    border-radius: 5px;
+
+}
+
+.form_container {
+    margin-top: 20px;
+}
+
+#form-title{
+    color: #fff;
+
+}
+
+.login_btn {
+    width: 100%;
+    background: #33ccff !important;
+    color: white !important;
+}
+.login_btn:focus {
+    box-shadow: none !important;
+    outline: 0 !important;
+}
+.login_container {
+    padding: 0 2rem;
+}
+.input-group-text {
+    background: #f7ba5b !important;
+    color: white !important;
+    border: 0 !important;
+    border-radius: 0.25rem 0 0 0.25rem !important;
+}
+.input_user,
+.input_pass:focus {
+    box-shadow: none !important;
+    outline: 0 !important;
+}
+
+#messages{
+    background-color: grey;
+    color: #fff;
+    padding: 10px;
+    margin-top: 10px;
+}

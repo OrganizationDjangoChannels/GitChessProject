@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+{% extends "ChessChannelsApp/base.html" %}
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+    {% block styles %}
+    <link href="{% static 'ChessChannelsApp/css/styles.css' %}" rel="stylesheet">
+    <link href="{% static 'ChessChannelsApp/css/animations.css' %}" rel="stylesheet">
+    <link href="{% static 'ChessChannelsApp/css/chessboard-1.0.0.css' %}" rel="stylesheet">
+    {% endblock styles %}
+    {% block before_body_scripts %}
+
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="{% static 'ChessChannelsApp/js/chessboard.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"
+            integrity="sha384-s3XgLpvmHyscVpijnseAmye819Ee3yaGa8NxstkJVyA6nuDFjt59u1QvuEl/mecz"
+            crossorigin="anonymous"></script>
+
+    {% endblock before_body_scripts %}
+</head>
+<body>
+    {% block main_content %}
+
+    <h1 style="color: white;">
+        There will be local game...
+    </h1>
+    <div id="myBoard" style="width: 400px"></div>
+
+
+
+
+    {% endblock main_content %}
+
+    {% block after_body_scripts %}
+
+    <script src="{% static 'ChessChannelsApp/js/gg.js' %}"></script>
+    <script src="{% static 'ChessChannelsApp/js/script.js' %}"></script>
+
+    {% endblock after_body_scripts %}
+
+
+</body>
+</html>
