@@ -89,14 +89,22 @@
             console.log(`onmessage_print ${data.message}`);
 
             if (data.type === 'matchmaking'){
-                console.log(`matchmaking ${data.username} to ${data.room}`);
-                if (username === data.username){
-                    // console.log(`matchmaking ${data.username} to ${data.room}`);
-
-                    window.location.replace(`/play/${data.room}`);
+                let white_pieces_player = data.white_pieces_player;
+                let black_pieces_player = data.black_pieces_player;
+                let token = data.token;
+                if (username === white_pieces_player || username === black_pieces_player){
+                    // setTimeout(() => window.location.replace(`/play/${token}`), Math.random());
+                    MatchmakingSocket.send(JSON.stringify({
+                        'type': 'matchmaking_disconnect',
+                        'username': "{{user.username}}",
+                        'token': token,
+                    }))
                 }
-
-
+            }
+            if (data.type === 'disconnecting'){
+                if (username === data.username){
+                    setTimeout(() => window.location.replace(`/play/${data.token}`), Math.random());
+                }
             }
         };
 
@@ -129,6 +137,7 @@
                         chosen_time_control = true;
 
                         MatchmakingSocket.send(JSON.stringify({
+                            'type': 'request_for_searching',
                             'searching': 1,
                             'message': message,
                             'username': "{{user.username}}",
@@ -149,6 +158,7 @@
                         matchmaking_buttons[i].style.backgroundColor = 'green';
                     }
                     MatchmakingSocket.send(JSON.stringify({
+                        'type': 'request_for_searching',
                         'searching': 0,
                         'message': message,
                         'username': "{{user.username}}",

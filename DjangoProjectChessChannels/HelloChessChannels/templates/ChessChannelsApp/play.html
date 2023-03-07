@@ -129,6 +129,8 @@
 
     {% block after_body_scripts %}
     <script>
+        // window.location.reload();
+        console.log("you're on play.html");
         let authenticated = ("{{request.user.is_authenticated}}" === "True")
 
         if (!authenticated){
@@ -283,13 +285,15 @@
         };
 
         chatSocket.onerror = function (e){
-            alert(`${e}`);
+            // alert(`${e}`);
+            console.error(`Chat socket closed caused by error ${e}`);
+            window.location.reload();  // try to reload page
         }
-
 
 
         chatSocket.onclose = function(e) {
             console.error('Chat socket closed unexpectedly');
+            // window.location.reload();  // try to reload page
         };
 
 

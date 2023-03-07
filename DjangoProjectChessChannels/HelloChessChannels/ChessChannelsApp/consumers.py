@@ -1,7 +1,7 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 from channels.db import database_sync_to_async
-from asgiref.sync import async_to_sync
+from asgiref.sync import async_to_sync, sync_to_async
 from django.shortcuts import redirect
 from secrets import token_urlsafe
 from time import sleep
@@ -18,12 +18,19 @@ play_connected_usernames_dict = dict()    # {token: set(), }
 
 # game_object = Game.objects.get(pk=1)
 # print(f'Database: {game_object.token} {game_object.white_pieces_player} {game_object.black_pieces_player}')
-
 @database_sync_to_async
 def get_game_by_token(token):
     game = Game.objects.get(token=token)
     return game
 
+@database_sync_to_async
+def write_game_into_database(token, white_pieces_player, black_pieces_player):
+    game = Game(token=token,
+                white_pieces_player=white_pieces_player,
+                black_pieces_player=black_pieces_player,
+                )
+
+    game.save()
 
 @database_sync_to_async
 def get_chat_messages_by_token(token):
@@ -74,39 +81,8 @@ def write_object_into_database(database_object, update_fields=None):
         database_object.save()
 
 
-def check_matchmaking(server, username, channel_layer, room_group_name):
-    next_launch = Timer(1.0, check_matchmaking, args=[server, username, channel_layer, room_group_name])
-    next_launch.start()  # relaunches in 1 second
-
-    for key in players_pairs.keys():
-        usernames = players_pairs[key]
-        if username in usernames:
-            next_launch.cancel()
-            print(f'username {username} is going to play...')
-            try:
-                throw_game_exception = Game.objects.get(token=key)
-
-                usernames.remove(username)
-                players_pairs[key] = usernames  # update
-
-                async_to_sync(channel_layer.group_send)(
-                    room_group_name,
-                    {
-                        'type': 'matchmaking_message',
-                        'username': username,
-                        'room': key,
-                    }
-                )
-
-            except Game.DoesNotExist:
-                print('still waiting response from database')
-
-
-
-        # print(key, players_pairs[key], username)
-
-
-def simple_matchmaking(server):  # temporary
+async def simple_matchmaking(server):  # temporary
+    print('players_searching_dict', players_searching_dict)
     for key in players_searching_dict.keys():
         time_control_players_set = players_searching_dict[key]
         if len(time_control_players_set) >= 2:
@@ -115,8 +91,9 @@ def simple_matchmaking(server):  # temporary
 
             game_token = token_urlsafe(16)  # url-token
             try:
-                throw_game_exception = Game.objects.get(token=game_token)  # check if game_token already exists
-                simple_matchmaking(server)  # if it does: try to do this function again
+                throw_game_exception = await get_game_by_token(token=game_token)  # check if game_token already exists
+                # await simple_matchmaking(server)  # if it does: try to do this function again
+                print('This game_token already exists.')
             except Game.DoesNotExist:  # This means the game_token is unique.
 
                 temporary_set = set()
@@ -128,15 +105,22 @@ def simple_matchmaking(server):  # temporary
                 print(f'matchmaking: white_pieces - {white_pieces_player}, black_pieces - {black_pieces_player}')
                 print(players_pairs)
 
-
+                play_connected_usernames_dict[game_token] = set()
 
                 # writing into the database
-                game = Game(token=game_token,
-                            white_pieces_player=white_pieces_player,
-                            black_pieces_player=black_pieces_player,
-                            )
+                await write_game_into_database(game_token, white_pieces_player, black_pieces_player)
 
-                game.save()
+                await server.channel_layer.group_send(
+                    server.room_group_name,
+                    {
+                        'type': 'matchmaking_message',
+                        'white_pieces_player': white_pieces_player,
+                        'black_pieces_player': black_pieces_player,
+                        'token': game_token,
+                    }
+                )
+
+
 
         players_searching_dict[key] = time_control_players_set  # update
 
@@ -199,6 +183,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             # print('play_connected_usernames_dict', play_connected_usernames_dict)
 
             self.all_chat_messages_array = await get_chat_messages_by_token(token=game_number)
+            print('self.all_chat_messages_array', self.all_chat_messages_array)
             self.number_of_all_sent_messages = 0
             # print(self.all_chat_messages_array)
             self.number_of_dynamic_loading_messages = 5
@@ -207,14 +192,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                                                   len(self.all_chat_messages_array))
 
             self.number_of_all_sent_messages = number_of_default_chat_messages
-
-            for i in range(number_of_default_chat_messages):
-                await self.send(text_data=json.dumps({
-                    'type': 'loaded_chat_message',
-                    'message': self.all_chat_messages_array[i]['message'],
-                    'username': self.all_chat_messages_array[i]['username'],
-                    'id': self.all_chat_messages_array[i]['id'],
-                }))
+            print('number_of_default_chat_messages', number_of_default_chat_messages)
+            if number_of_default_chat_messages > 0:
+                for i in range(number_of_default_chat_messages):
+                    await self.send(text_data=json.dumps({
+                        'type': 'loaded_chat_message',
+                        'message': self.all_chat_messages_array[i]['message'],
+                        'username': self.all_chat_messages_array[i]['username'],
+                        'id': self.all_chat_messages_array[i]['id'],
+                    }))
 
             print(f'self.number_of_all_sent_messages {self.number_of_all_sent_messages}')
 
@@ -235,6 +221,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         black_pieces_player = await get_black_pieces_player(game_number)
         white_pieces_player_connected = 0
         black_pieces_player_connected = 0
+
+        check_existence_of_set = play_connected_usernames_dict.get(game_number)
+        if check_existence_of_set is None:
+            play_connected_usernames_dict[game_number] = set()
 
         if white_pieces_player in play_connected_usernames_dict[game_number]:
             white_pieces_player_connected = 1
@@ -382,66 +372,80 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
 
-class MatchmakingConsumer(WebsocketConsumer):
-    def connect(self):
+class MatchmakingConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
 
         # get user
         self.user = self.scope["user"]
         self.room_group_name = 'common'
 
-        async_to_sync(self.channel_layer.group_add)(
+        await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name,
         )
 
-        self.accept()
+        await self.accept()
 
-    def disconnect(self, close_code):
-        async_to_sync(self.channel_layer.group_discard)(
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name,
         )
+
+
 
         print(f'close_code {close_code}')
 
-    def receive(self, text_data=None, bytes_data=None):
+    async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
-        message = text_data_json['message']
-        username = text_data_json['username']
-        searching = text_data_json['searching']
+        type = text_data_json['type']
 
-        print(message, username, searching)
+        if type == 'matchmaking_disconnect':
+            token = text_data_json['token']
+            username = text_data_json['username']
+            if self.user.username == username:
 
-        if searching:
-            player_tuple = (message, username)
-            players_searching_set.add(player_tuple)
-            players_searching_dict[message].add(username)
-            simple_matchmaking(self)
-            check_matchmaking(self, self.user.username, self.channel_layer, self.room_group_name)
-            print(f'players_pairs {players_pairs}')
+                print(f'{username} is disconnecting from main.html to {token}')
+                await self.send(text_data=json.dumps({
+                    'type': 'disconnecting',
+                    'username': username,
+                    'token': token,
+                }))
 
+                await self.disconnect(999)
 
+        if type == 'request_for_searching':
 
+            message = text_data_json['message']
+            username = text_data_json['username']
+            searching = text_data_json['searching']
+            if searching:
+                player_tuple = (message, username)
+                players_searching_set.add(player_tuple)
+                players_searching_dict[message].add(username)
+                await simple_matchmaking(self)
+                # check_matchmaking(self, self.user.username, self.channel_layer, self.room_group_name)
+                print(f'players_pairs {players_pairs}')
 
-        else:
-            players_searching_set.discard((message, username))
-            players_searching_dict[message].discard(username)
+            else:
+                players_searching_set.discard((message, username))
+                players_searching_dict[message].discard(username)
 
-        print(players_searching_set)
-        print(players_searching_dict)
-        print(f'current user {self.user}')
+        # print(players_searching_set)
+        # print(players_searching_dict)
+        # print(f'current user {self.user}')
 
-
-
-    def matchmaking_message(self, event):
-        username = event['username']
-        room = event['room']
-        print('matchmaking_message was called')
-        self.send(text_data=json.dumps({
+    async def matchmaking_message(self, event):
+        white_pieces_player = event['white_pieces_player']
+        black_pieces_player = event['black_pieces_player']
+        token = event['token']
+        await self.send(text_data=json.dumps({
             'type': 'matchmaking',
-            'username': username,
-            'room': room,
+            'white_pieces_player': white_pieces_player,
+            'black_pieces_player': black_pieces_player,
+            'token': token,
         }))
+
 
 
 
