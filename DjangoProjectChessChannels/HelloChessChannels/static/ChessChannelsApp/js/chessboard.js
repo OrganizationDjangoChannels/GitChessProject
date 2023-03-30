@@ -569,7 +569,7 @@
     // default piece theme is wikipedia
     if (!config.hasOwnProperty('pieceTheme') ||
         (!isString(config.pieceTheme) && !isFunction(config.pieceTheme))) {
-      config.pieceTheme = '/static/ChessChannelsApp/images/{piece}.png'
+      config.pieceTheme = '/static/ChessChannelsApp/images/chesspieces/wikipedia/{piece}.png'
 
     }
 

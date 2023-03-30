@@ -1,7 +1,10 @@
+let board1 = null
 let board = null
 let game = new Chess()
+let stack = []
 const whiteSquareGrey = '#a9a9a9'
 const blackSquareGrey = '#696969'
+
 
 function removeGreySquares () {
     $('#myBoard .square-55d63').css('background', '')
@@ -20,16 +23,19 @@ function greySquare (square) {
 
 function onDragStart (source, piece) {
     // do not pick up pieces if the game is over
-    if (game.game_over()) return false
+    if (game.game_over()){
+
+        return false
+        }
 
     // or if it's not that side's turn
-    if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-        (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+    if ((game.turn === 'w' && piece.search(/^b/) !== -1) ||
+        (game.turn === 'b' && piece.search(/^w/) !== -1)) {
         return false
     }
 }
 
-function onDrop (source, target) {
+function onDrop (source, target, oldPos, newPos) {
     removeGreySquares()
 
     // see if the move is legal
@@ -41,6 +47,18 @@ function onDrop (source, target) {
 
     // illegal move
     if (move === null) return 'snapback'
+    stack = game.history()
+    if(game.game_over()){
+        const h = document.getElementById("myButton")
+        h.disabled = false
+        const h1 = document.getElementById("myButton1")
+        h1.disabled = false
+
+        alert(`${game.turn() === 'w'? "Black":"White"} is winner.`)
+    }
+
+
+
 }
 
 function onMouseoverSquare (square) {
@@ -61,22 +79,47 @@ function onMouseoverSquare (square) {
         greySquare(moves[i].to)
     }
 }
+let y = []
+function returnMove(){
+    y = game.history()
+    game.reset()
+    board.start(false)
+    for(let i=0; i < (y.length)-1; i++){
+        game.move(y[i])
 
+    }
+    board.position(game.fen(), false)
+
+}
+function nextMove(){
+    y = game.history()
+    if(y.length < stack.length){
+        for(let c = y.length; c < y.length + 1; ++c){
+            game.move(stack[c])
+        }
+        board.position(game.fen(), false)
+    }
+
+}
 function onMouseoutSquare () {
     removeGreySquares()
 }
 
 function onSnapEnd () {
-    board.position(game.fen())
+  board.position(game.fen());
+
 }
 
 let config = {
-    draggable: true,
-    position: 'start',
-    onDragStart: onDragStart,
-    onDrop: onDrop,
-    onMouseoutSquare: onMouseoutSquare,
-    onMouseoverSquare: onMouseoverSquare,
-    onSnapEnd: onSnapEnd
+  draggable: true,
+  position: 'start',
+  onDragStart: onDragStart,
+  onDrop: onDrop,
+  onMouseoutSquare: onMouseoutSquare,
+  onMouseoverSquare: onMouseoverSquare,
+  onSnapEnd: onSnapEnd
 }
+
+
 board = Chessboard('myBoard', config);
+
