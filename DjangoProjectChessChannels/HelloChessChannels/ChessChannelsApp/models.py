@@ -9,6 +9,7 @@ class Game(models.Model):
     white_pieces_player_rating = models.IntegerField(default=1000)
     black_pieces_player = models.CharField(max_length=30)
     black_pieces_player_rating = models.IntegerField(default=1000)
+    moves = models.TextField(blank=True)
     time_create = models.DateTimeField(auto_now_add=True)
     isActive = models.BooleanField(blank=True, null=True)
 

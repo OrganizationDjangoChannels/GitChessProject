@@ -11,12 +11,15 @@
 
     <link href="{% static 'ChessChannelsApp/css/styles.css' %}" rel="stylesheet">
     <link href="{% static 'ChessChannelsApp/css/play_styles.css' %}" rel="stylesheet">
+    <link href="{% static 'ChessChannelsApp/css/animations.css' %}" rel="stylesheet">
+    <link href="{% static 'ChessChannelsApp/css/chessboard-1.0.0.css' %}" rel="stylesheet">
 
     <style>
         .chat_div_class{
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
+            padding-top: 90px;
         }
 
         .all_chat_messages{
@@ -50,84 +53,95 @@
             vertical-align: center;
 
         }
+
+        .main_div_flexbox_container{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 30px 10px 30px 10px;
+        }
     </style>
 
     {% endblock styles %}
+
+    {% block before_body_scripts %}
+
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="{% static 'ChessChannelsApp/js/chessboard.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"
+            integrity="sha384-s3XgLpvmHyscVpijnseAmye819Ee3yaGa8NxstkJVyA6nuDFjt59u1QvuEl/mecz"
+            crossorigin="anonymous">
+    </script>
+
+    {% endblock before_body_scripts %}
+
+
 </head>
 <body>
     {% block main_content %}
-    <h1 style="color:white;">
-        Playing on number {{game.token}}
-    </h1>
 
-    <div style="color:white;">
-        white_pieces_player: {{game.white_pieces_player}}
-        <span id="white_pieces_player_connection_status">
-            null
-            <!--for debugging-->
-        </span>
-    </div>
+    <div class="main_div_flexbox_container">
 
-    <div style="color:white;">
-        black_pieces_player: {{game.black_pieces_player}}
-        <span id="black_pieces_player_connection_status">
-            null
-            <!--for debugging-->
-        </span>
-    </div>
-
-    <div style="color:white;">
-        the number of viewers:
-        <span id="number_of_viewers">0</span>
-    </div>
-
-
-    <div class="flex_container">
-
-
-
-        <form id="chess_move_form" class="flex_element">
-            <div style="color:white">chess moves</div>
-            <input type="text" name="message"/>
-
-        </form>
-
-    </div>
-
-
-
-    <div class="chat_div_class">
-
-        <div>
-
-        <div id="chat_messages"  class="all_chat_messages">
-
+        <div style="padding: 30px;">
+            <div id="myBoard" style="width: 500px"></div>
+            <button id = "myButton" style = "background-color: #b58863" onclick="returnMove()" disabled>Return move</button>
+            <button id = "myButton1" style = "background-color: #b58863" onclick="nextMove()" disabled>Next move</button>
         </div>
 
-        <div style="display: flex; justify-content: center; padding: 10px;">
+        <div style="padding: 30px 50px 30px 50px;">
 
-            <form id="chat_form" style="padding: 10px;">
-<!--                <div style="color:white">chat messages</div>-->
-                <input class="input_chat_area" placeholder="write a message" autocomplete="off"
-                       type="text" name="message"/>
+            <div style="color:white; padding: 10px;">
+                white_pieces_player: {{game.white_pieces_player}}
+                <span id="white_pieces_player_connection_status">
+                    null
+                    <!--for debugging-->
+                </span>
+            </div>
 
-            </form>
+            <div style="color:white; padding: 10px;">
+                black_pieces_player: {{game.black_pieces_player}}
+                <span id="black_pieces_player_connection_status">
+                    null
+                    <!--for debugging-->
+                </span>
+            </div>
+
+            <div style="color:white; padding: 10px;">
+                the number of viewers:
+                <span id="number_of_viewers">0</span>
+            </div>
+
+            <div class="chat_div_class">
+                <div>
+
+                    <div id="chat_messages"  class="all_chat_messages">
+
+                    </div>
+
+                    <div style="display: flex; justify-content: center; padding: 10px;">
+
+                        <form id="chat_form" style="padding: 10px;">
+                            <!--<div style="color:white">chat messages</div>-->
+                            <input class="input_chat_area" placeholder="write a message" autocomplete="off"
+                                   type="text" name="message"/>
+
+                        </form>
+
+                    </div>
+
+                </div>
+            </div>
 
         </div>
-
-        </div>
-
-
     </div>
 
-    <div id="root">
 
-    </div>
-    <div id="app"></div>
     {% endblock main_content %}
 
 
     {% block after_body_scripts %}
+
+
     <script>
         // window.location.reload();
         console.log("you're on play.html");
@@ -141,7 +155,7 @@
 
         let white_pieces_player = "{{game.white_pieces_player}}";
         let black_pieces_player = "{{game.black_pieces_player}}";
-
+        let current_username = "{{user.username}}";
 
         let white_pieces_player_connected = 0;
         let black_pieces_player_connected = 0;
@@ -188,7 +202,7 @@
             tag.prepend(div_tag);
             tag.scrollTo(0, tag.scrollHeight);
             console.log(`tag height: ${tag.scrollHeight}, div_tag height: ${div_tag.offsetHeight}`);
-            return div_tag.offsetHeight + 5;  // for better vision of chat message
+            return div_tag.offsetHeight + 48;  // for better vision of chat message
         }
 
 
@@ -223,20 +237,7 @@
                 messages.scrollTo(0, messages.scrollHeight);
             }
 
-            if (data.type === 'chess_move'){
-                let messages = document.getElementById('chess_move_messages');
 
-                let div_tag = document.createElement("div")
-                let p_tag = document.createElement("p");
-                p_tag.innerHTML = `${data.username}: ${data.message}`;
-                p_tag.style.color = 'white';
-                let p_tag_time = document.createElement("p");
-                p_tag_time.innerHTML = `now: ${data.time}  received back: ${new Date().toLocaleTimeString()}`;
-                p_tag_time.style.color = 'white';
-                div_tag.append(p_tag);
-                div_tag.append(p_tag_time);
-                messages.append(div_tag);
-            }
 
             if (data.type === 'connection'){
                 let username = data.username;
@@ -278,7 +279,8 @@
                 let message = data.message;
                 console.log(`${username}: ${message}`);
                 // data.id printing is temporary
-                let height = write_chat_message_into_tag(`${data.id} ${username}: ${message}`, chat_messages_div);
+                // let height = write_chat_message_into_tag(`${data.id} ${username}: ${message}`, chat_messages_div);
+                let height = write_chat_message_into_tag(`${username}: ${message}`, chat_messages_div);
                 chat_messages_div.scrollTo(0, height);
             }
 
@@ -320,46 +322,11 @@
             chat_form.reset();
         })
 
-        let chess_move_form = document.getElementById('chess_move_form');
-        chess_move_form.addEventListener('submit', function (e){
-            e.preventDefault();
-            let message = e.target.message.value;
-            let current_time_hms = new Date().toLocaleTimeString();
-            if (authenticated) {
-                let username = "{{user.username}}";
-                console.log("{{game.white_pieces_player}}");
-                console.log("{{game.black_pieces_player}}");
-                if (username === "{{game.white_pieces_player}}" || username === "{{game.black_pieces_player}}") {
-                    chatSocket.send(JSON.stringify({
-                        'type': 'chess_move',
-                        'message': message,
-                        'username': "{{user.username}}",
-                        'time': current_time_hms,
-                        'token': game_token,
-                    }));
-                }
-            }
-
-            chess_move_form.reset();
-        })
-
-
-        // if (authenticated){
-        //     console.log("{{user.username}}");
-        //     console.log("{{user.id}}");
-        //     console.log("{{user.password}}");
-        // }else{
-        //     // redirect to login page
-        //     window.location.replace("{% url 'login' %}");
-        // }
     </script>
 
+    <script src="{% static 'ChessChannelsApp/js/gg.js' %}"></script>
 
-<!--    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>-->
-<!--    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>-->
-<!--    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>-->
-
-
+    <script src="{% static 'ChessChannelsApp/js/script.js' %}"></script>
 
     {% endblock after_body_scripts %}
 

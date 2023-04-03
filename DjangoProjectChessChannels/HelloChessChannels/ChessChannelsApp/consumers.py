@@ -32,6 +32,11 @@ def write_game_into_database(token, white_pieces_player, black_pieces_player):
 
     game.save()
 
+
+@database_sync_to_async
+def update_game_data(game, update_fields):
+    game.save(update_fields=update_fields)
+
 @database_sync_to_async
 def get_chat_messages_by_token(token):
     queryset_chat_messages = ChatMessages.objects.filter(token=token).order_by('-id')
@@ -256,7 +261,32 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         text_data_json = json.loads(text_data)
         type = text_data_json['type']
-        # print(username, message, time, token)
+
+
+        if type == 'chessmove':
+            message = text_data_json["message"]
+            username = text_data_json["username"]
+            time = text_data_json["time"]
+            token = text_data_json["token"]
+            print(f'chessmove incoming: {text_data_json["message"]} from {text_data_json["username"]}'
+                  f' at {text_data_json["time"]}')
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'chessmove_message',
+                    'message': message,
+                    'username': username,
+                    'time': time,
+                    'token': token,
+                }
+            )
+
+            game = await get_game_by_token(token=token)
+            moves_received_from_the_database = game.moves
+            game.moves = moves_received_from_the_database + f' {message}'
+            await update_game_data(game, update_fields=["moves"])
+            print('allmoves: ', game.moves)
+
 
         if type == 'dynamic_loading':
 
@@ -298,31 +328,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
             await write_into_chat_messages_by_token(token=token, username=username, message=message)
 
-
-            # game = await get_game_by_token(token=token)
-            # chat_messages_update = game.chat_messages + f'{username}: "{message}";'
-            # game.chat_messages = chat_messages_update
-            # game.chat_messages = ""
-            # await write_object_into_database(game, ['chat_messages'])
-
-        if type == 'chess_move':
-
-            message = text_data_json['message']
-            username = text_data_json['username']
-            time = text_data_json['time']
-            token = text_data_json['token']
-
-            # Send message to room group
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'chess_move_message',
-                    'message': message,
-                    'username': username,
-                    'time': time,
-                    'token': token,
-                }
-            )
+    async def chessmove_message(self, event):
+        message = event['message']
+        username = event['username']
+        time = event['time']
+        token = event['token']
+        await self.send(text_data=json.dumps({
+            'type': 'chessmove',
+            'message': message,
+            'username': username,
+            'time': time,
+            'token': token,
+        }))
 
     async def connection_message(self, event):
         message = event['message']
@@ -359,17 +376,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # game = await get_game_by_token(token=token)
         # print(game.chat_messages)
 
-    async def chess_move_message(self, event):
-        message = event['message']
-        username = event['username']
-        time = event['time']
-        # Send message to WebSocket
-        await self.send(text_data=json.dumps({
-            'type': 'chess_move',
-            'message': message,
-            'username': username,
-            'time': time,
-        }))
 
 
 class MatchmakingConsumer(AsyncWebsocketConsumer):

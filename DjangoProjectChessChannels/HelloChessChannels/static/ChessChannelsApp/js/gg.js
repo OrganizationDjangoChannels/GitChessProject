@@ -6,6 +6,16 @@ const whiteSquareGrey = '#a9a9a9'
 const blackSquareGrey = '#696969'
 
 
+chatSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+    if (data.type === 'chessmove'){
+        console.log(`received ${data.message} from ${data.username} at ${data.time}`);
+        let current_time = new Date();
+        let server_received_time = Date.parse(data.time);
+        console.log(`time diff: ${current_time - server_received_time}ms.`);
+    }
+}
+
 function removeGreySquares () {
     $('#myBoard .square-55d63').css('background', '')
 }
@@ -35,6 +45,8 @@ function onDragStart (source, piece) {
     }
 }
 
+
+
 function onDrop (source, target, oldPos, newPos) {
     removeGreySquares()
 
@@ -57,6 +69,17 @@ function onDrop (source, target, oldPos, newPos) {
         alert(`${game.turn() === 'w'? "Black":"White"} is winner.`)
     }
 
+    // try to connect to server
+    let current_time_hms = new Date().toISOString();
+    console.log(current_time_hms);
+    chatSocket.send(JSON.stringify({
+                        'type': 'chessmove',
+                        'message': move.san,
+                        'username': current_username,
+                        'time': current_time_hms,
+                        'token': game_token,
+                    }));
+    console.log(move.san); // print chessmove into the console
 
 
 }
