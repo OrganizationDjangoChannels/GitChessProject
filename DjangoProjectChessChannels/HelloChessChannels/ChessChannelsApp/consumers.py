@@ -268,6 +268,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             username = text_data_json["username"]
             time = text_data_json["time"]
             token = text_data_json["token"]
+            move_to = text_data_json["move_to"]
+            move_from = text_data_json["move_from"]
             print(f'chessmove incoming: {text_data_json["message"]} from {text_data_json["username"]}'
                   f' at {text_data_json["time"]}')
             await self.channel_layer.group_send(
@@ -275,6 +277,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 {
                     'type': 'chessmove_message',
                     'message': message,
+                    'move_to': move_to,
+                    'move_from': move_from,
                     'username': username,
                     'time': time,
                     'token': token,
@@ -333,9 +337,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         username = event['username']
         time = event['time']
         token = event['token']
+        move_to = event['move_to']
+        move_from = event['move_from']
         await self.send(text_data=json.dumps({
             'type': 'chessmove',
             'message': message,
+            'move_to': move_to,
+            'move_from': move_from,
             'username': username,
             'time': time,
             'token': token,

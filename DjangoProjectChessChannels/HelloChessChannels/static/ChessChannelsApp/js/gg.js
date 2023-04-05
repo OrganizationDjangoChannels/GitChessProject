@@ -1,10 +1,9 @@
-let board1 = null
+
 let board = null
 let game = new Chess()
 let stack = []
 const whiteSquareGrey = '#a9a9a9'
 const blackSquareGrey = '#696969'
-
 
 chatSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
@@ -13,7 +12,15 @@ chatSocket.onmessage = function(e) {
         let current_time = new Date();
         let server_received_time = Date.parse(data.time);
         console.log(`time diff: ${current_time - server_received_time}ms.`);
+        let move = game.move({
+            from: data.move_from,
+            to: data.move_to,
+            promotion: 'q' // NOTE: always promote to a queen for example simplicity
+        })
+
+        board.position(game.fen())
     }
+
 }
 
 function removeGreySquares () {
@@ -75,11 +82,15 @@ function onDrop (source, target, oldPos, newPos) {
     chatSocket.send(JSON.stringify({
                         'type': 'chessmove',
                         'message': move.san,
+                        'move_from': move.from,
+                        'move_to': move.to,
                         'username': current_username,
                         'time': current_time_hms,
                         'token': game_token,
                     }));
     console.log(move.san); // print chessmove into the console
+    console.log(move.to);
+    console.log("bred");
 
 
 }
@@ -132,6 +143,11 @@ function onSnapEnd () {
   board.position(game.fen());
 
 }
+let board_orientation = 'white';
+
+if (current_username === black_pieces_player){
+    board_orientation = 'black';
+}
 
 let config = {
   draggable: true,
@@ -140,7 +156,8 @@ let config = {
   onDrop: onDrop,
   onMouseoutSquare: onMouseoutSquare,
   onMouseoverSquare: onMouseoverSquare,
-  onSnapEnd: onSnapEnd
+  onSnapEnd: onSnapEnd,
+  orientation: board_orientation,
 }
 
 
