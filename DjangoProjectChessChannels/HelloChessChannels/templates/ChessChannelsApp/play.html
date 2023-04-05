@@ -214,77 +214,77 @@
             + '/'
         );
 
-        chatSocket.onmessage = function(e) {
-            const data = JSON.parse(e.data);
-            // console.log(`onmessage_print ${data.message}`);
-
-            if (data.type === 'chat'){
-                let messages = document.getElementById('chat_messages');
-
-                let div_tag = document.createElement("div");
-
-                let p_tag = document.createElement("p");
-                p_tag.innerHTML = `${data.username}: ${data.message}`;
-                p_tag.style.color = 'white';
-                // let p_tag_time = document.createElement("p");
-                // p_tag_time.innerHTML = `now: ${data.time}  received back: ${new Date().toLocaleTimeString()}`;
-                // p_tag_time.style.color = 'white';
-
-                div_tag.append(p_tag);
-                // div_tag.append(p_tag_time);
-                messages.append(div_tag);
-
-                messages.scrollTo(0, messages.scrollHeight);
-            }
-
-
-
-            if (data.type === 'connection'){
-                let username = data.username;
-                white_pieces_player_connected = data.white_pieces_player_connected;
-                black_pieces_player_connected = data.black_pieces_player_connected;
-
-
-                console.log(data);
-
-                if (username === "{{user.username}}"){
-                    current_user_connected = true;
-                }
-
-
-                white_span_connection_status = document.getElementById('white_pieces_player_connection_status');
-                black_span_connection_status = document.getElementById('black_pieces_player_connection_status');
-
-                if (white_pieces_player_connected === 1){
-                    white_span_connection_status.innerText = 'online';
-                }else{
-                    white_span_connection_status.innerText = 'offline';
-                }
-
-                if (black_pieces_player_connected === 1){
-                    black_span_connection_status.innerText = 'online';
-                }else{
-                    black_span_connection_status.innerText = 'offline';
-                }
-
-
-                number_of_viewers = data.number_of_viewers;
-
-
-
-            }
-
-            if (data.type === 'loaded_chat_message'){
-                let username = data.username;
-                let message = data.message;
-                console.log(`${username}: ${message}`);
-                // data.id printing is temporary
-                // let height = write_chat_message_into_tag(`${data.id} ${username}: ${message}`, chat_messages_div);
-                let height = write_chat_message_into_tag(`${username}: ${message}`, chat_messages_div);
-                chat_messages_div.scrollTo(0, height);
-            }
-
-        };
+        // chatSocket.onmessage = function(e) {
+        //     const data = JSON.parse(e.data);
+        //     // console.log(`onmessage_print ${data.message}`);
+        //
+        //     if (data.type === 'chat'){
+        //         let messages = document.getElementById('chat_messages');
+        //
+        //         let div_tag = document.createElement("div");
+        //
+        //         let p_tag = document.createElement("p");
+        //         p_tag.innerHTML = `${data.username}: ${data.message}`;
+        //         p_tag.style.color = 'white';
+        //         // let p_tag_time = document.createElement("p");
+        //         // p_tag_time.innerHTML = `now: ${data.time}  received back: ${new Date().toLocaleTimeString()}`;
+        //         // p_tag_time.style.color = 'white';
+        //
+        //         div_tag.append(p_tag);
+        //         // div_tag.append(p_tag_time);
+        //         messages.append(div_tag);
+        //
+        //         messages.scrollTo(0, messages.scrollHeight);
+        //     }
+        //
+        //
+        //
+        //     if (data.type === 'connection'){
+        //         let username = data.username;
+        //         white_pieces_player_connected = data.white_pieces_player_connected;
+        //         black_pieces_player_connected = data.black_pieces_player_connected;
+        //
+        //
+        //         console.log(data);
+        //
+        //         if (username === current_username){
+        //             current_user_connected = true;
+        //         }
+        //
+        //
+        //         white_span_connection_status = document.getElementById('white_pieces_player_connection_status');
+        //         black_span_connection_status = document.getElementById('black_pieces_player_connection_status');
+        //
+        //         if (white_pieces_player_connected === 1){
+        //             white_span_connection_status.innerText = 'online';
+        //         }else{
+        //             white_span_connection_status.innerText = 'offline';
+        //         }
+        //
+        //         if (black_pieces_player_connected === 1){
+        //             black_span_connection_status.innerText = 'online';
+        //         }else{
+        //             black_span_connection_status.innerText = 'offline';
+        //         }
+        //
+        //
+        //         number_of_viewers = data.number_of_viewers;
+        //
+        //
+        //
+        //     }
+        //
+        //     if (data.type === 'loaded_chat_message'){
+        //         let username = data.username;
+        //         let message = data.message;
+        //         console.log(`${username}: ${message}`);
+        //         // data.id printing is temporary
+        //         // let height = write_chat_message_into_tag(`${data.id} ${username}: ${message}`, chat_messages_div);
+        //         let height = write_chat_message_into_tag(`${username}: ${message}`, chat_messages_div);
+        //         chat_messages_div.scrollTo(0, height);
+        //     }
+        //
+        // };
 
         chatSocket.onerror = function (e){
             // alert(`${e}`);
