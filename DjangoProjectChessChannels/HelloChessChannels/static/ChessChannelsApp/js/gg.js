@@ -1,4 +1,4 @@
-
+// useless comment
 let board = null
 let game = new Chess()
 let stack = []
