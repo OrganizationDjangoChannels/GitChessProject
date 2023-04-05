@@ -210,13 +210,20 @@ function onSnapEnd () {
 
 }
 let board_orientation = 'white';
+let board_draggable = true;
 
 if (current_username === black_pieces_player){
     board_orientation = 'black';
 }
+else if (current_username === white_pieces_player){
+    board_orientation = 'white';
+}
+else{
+    board_draggable = false;
+}
 
 let config = {
-  draggable: true,
+  draggable: board_draggable,
   position: 'start',
   onDragStart: onDragStart,
   onDrop: onDrop,
