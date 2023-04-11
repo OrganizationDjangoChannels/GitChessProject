@@ -116,11 +116,13 @@ function onDragStart (source, piece) {
         (game.turn === 'b' && piece.search(/^w/) !== -1)) {
         return false
     }
+
+
 }
 
 
 
-function onDrop (source, target, oldPos, newPos) {
+function onDrop (source, target, piece) {
     removeGreySquares()
 
     // see if the move is legal
@@ -129,9 +131,15 @@ function onDrop (source, target, oldPos, newPos) {
         to: target,
         promotion: 'q' // NOTE: always promote to a queen for example simplicity
     })
+    console.log(move)
 
     // illegal move
     if (move === null) return 'snapback'
+
+    if((current_username === white_pieces_player && move.color !== 'w') || (current_username === black_pieces_player && move.color !== 'b') ) {
+        game.undo();
+        return 'snapback';}
+
     stack = game.history()
     if(game.game_over()){
         const h = document.getElementById("myButton")
@@ -156,12 +164,11 @@ function onDrop (source, target, oldPos, newPos) {
                     }));
     console.log(move.san); // print chessmove into the console
     console.log(move.to);
-    console.log("bred");
 
 
 }
 
-function onMouseoverSquare (square) {
+function onMouseoverSquare (square, piece) {
     // get list of possible moves or this square
     let moves = game.moves({
         square: square,
@@ -169,7 +176,10 @@ function onMouseoverSquare (square) {
     })
 
     // exit if there are no moves available for this square
-    if (moves.length === 0) return
+    if ((moves.length === 0) || (current_username !== white_pieces_player && current_username !== black_pieces_player) || (current_username === white_pieces_player && piece.search(/^b/) !== -1) || (current_username === black_pieces_player && piece.search(/^w/) !== -1))
+    {
+        return;
+    }
 
     // highlight the square they moused over
     greySquare(square)
@@ -214,12 +224,18 @@ let board_draggable = true;
 
 if (current_username === black_pieces_player){
     board_orientation = 'black';
+
+
 }
 else if (current_username === white_pieces_player){
     board_orientation = 'white';
+
+
 }
 else{
     board_draggable = false;
+
+
 }
 
 let config = {
