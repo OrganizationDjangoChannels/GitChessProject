@@ -6,7 +6,7 @@ const whiteSquareGrey = '#a9a9a9'
 const blackSquareGrey = '#696969'
 let fens_array_dynamic = null;
 
-if (fens_array.length === 0){
+if (fens_array.length === 1){
     fens_array_dynamic = ['rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'];
 }
 else{
