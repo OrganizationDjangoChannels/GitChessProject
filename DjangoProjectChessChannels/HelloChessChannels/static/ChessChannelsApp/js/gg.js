@@ -4,6 +4,17 @@ let game = new Chess()
 let stack = []
 const whiteSquareGrey = '#a9a9a9'
 const blackSquareGrey = '#696969'
+let fens_array_dynamic = null;
+
+if (fens_array.length === 0){
+    fens_array_dynamic = ['rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'];
+}
+else{
+    fens_array_dynamic = fens_array.slice();
+}
+
+let fens_array_dynamic_index = null;
+let fens_array_index = fens_array.length - 1;
 
 chatSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
@@ -14,7 +25,25 @@ chatSocket.onmessage = function(e) {
         console.log(`time diff: ${current_time - server_received_time}ms.`);
         let move = game.move(data.message);
 
+        fens_array_dynamic.push(data.fen);
+        console.log(`fens_array_dynamic = ${fens_array_dynamic}`);
+        if (fens_array_dynamic.length > fens_array.length){
+            fens_array_index = fens_array_dynamic.length - 1;  // update
+        }
+        console.log(fens_array_dynamic);
+        fens_array_dynamic_index = fens_array_dynamic.length - 1;
+
         board.position(game.fen());
+
+
+        if (game.game_over()){
+            const h = document.getElementById("myButton")
+            h.disabled = false
+            const h1 = document.getElementById("myButton1")
+            h1.disabled = false
+
+            console.log(`${game.turn() === 'w'? "Black":"White"} is winner.`);
+        }
     }
 
 
@@ -139,14 +168,15 @@ function onDrop (source, target, piece) {
         return 'snapback';}
 
     stack = game.history()
-    if(game.game_over()){
-        const h = document.getElementById("myButton")
-        h.disabled = false
-        const h1 = document.getElementById("myButton1")
-        h1.disabled = false
-
-        alert(`${game.turn() === 'w'? "Black":"White"} is winner.`)
-    }
+    // if(game.game_over()){
+    //     const h = document.getElementById("myButton")
+    //     h.disabled = false
+    //     const h1 = document.getElementById("myButton1")
+    //     h1.disabled = false
+    //
+    //     alert(`${game.turn() === 'w'? "Black":"White"} is winner.`)
+    //     console.log(`${game.turn() === 'w'? "Black":"White"} is winner.`);
+    // }
 
     // try to connect to server
     let current_time_hms = new Date().toISOString();
@@ -154,6 +184,7 @@ function onDrop (source, target, piece) {
     chatSocket.send(JSON.stringify({
                         'type': 'chessmove',
                         'message': move.san,
+                        'fen': game.fen(),
                         'move_from': move.from,
                         'move_to': move.to,
                         'username': current_username,
@@ -188,25 +219,34 @@ function onMouseoverSquare (square, piece) {
     }
 }
 let y = []
-function returnMove(){
-    y = game.history()
-    game.reset()
-    board.start(false)
-    for(let i=0; i < (y.length)-1; i++){
-        game.move(y[i])
 
+
+function returnMove(){
+    if (fens_array_dynamic.length > fens_array.length){
+        y = fens_array_dynamic;  // update
+    }else{
+        y = fens_array;
     }
-    board.position(game.fen(), false)
+
+    if (fens_array_index > 0){
+        fens_array_index -= 1;
+        board.position(y[fens_array_index], false)
+        console.log(`game_history = ${y} ; index = ${fens_array_index}`);
+    }
 
 }
 function nextMove(){
-    y = game.history()
-    if(y.length < stack.length){
-        for(let c = y.length; c < y.length + 1; ++c){
-            game.move(stack[c])
-        }
-        board.position(game.fen(), false)
+    if (fens_array_dynamic.length > fens_array.length){
+        y = fens_array_dynamic;  // update
+    }else{
+        y = fens_array;
     }
+    if (fens_array_index < y.length - 1){
+        fens_array_index += 1;
+        board.position(y[fens_array_index], false)
+        console.log(`game_history = ${y}`);
+    }
+
 
 }
 function onMouseoutSquare () {
@@ -255,3 +295,9 @@ for (let i = 0; i < chessmoves_array.length; i++){
 }
 
 board.position(game.fen(), false);
+
+if (game.game_over()){
+
+
+    console.log(`${game.turn() === 'w'? "Black":"White"} is winner.`);
+}

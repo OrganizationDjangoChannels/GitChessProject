@@ -269,6 +269,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             username = text_data_json["username"]
             time = text_data_json["time"]
             token = text_data_json["token"]
+            fen = text_data_json["fen"]
             move_to = text_data_json["move_to"]
             move_from = text_data_json["move_from"]
             print(f'chessmove incoming: {text_data_json["message"]} from {text_data_json["username"]}'
@@ -278,6 +279,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 {
                     'type': 'chessmove_message',
                     'message': message,
+                    'fen': fen,
                     'move_to': move_to,
                     'move_from': move_from,
                     'username': username,
@@ -293,7 +295,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
             else:
                 game.moves = moves_received_from_the_database + message
 
-            await update_game_data(game, update_fields=["moves"])
+            fens_received_from_the_database = game.fens
+
+            if fens_received_from_the_database != "":
+                game.fens = fens_received_from_the_database + f'${fen}'
+            else:
+                game.fens = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1$' + fen
+
+            await update_game_data(game, update_fields=["moves", "fens"])
             print('allmoves: ', game.moves)
 
 
@@ -342,11 +351,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         username = event['username']
         time = event['time']
         token = event['token']
+        fen = event['fen']
         move_to = event['move_to']
         move_from = event['move_from']
         await self.send(text_data=json.dumps({
             'type': 'chessmove',
             'message': message,
+            'fen': fen,
             'move_to': move_to,
             'move_from': move_from,
             'username': username,

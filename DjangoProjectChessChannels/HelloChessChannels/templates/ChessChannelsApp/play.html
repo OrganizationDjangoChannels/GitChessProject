@@ -84,8 +84,8 @@
 
         <div style="padding: 30px;">
             <div id="myBoard" style="width: 500px"></div>
-            <button id = "myButton" style = "background-color: #b58863" onclick="returnMove()" disabled>Return move</button>
-            <button id = "myButton1" style = "background-color: #b58863" onclick="nextMove()" disabled>Next move</button>
+            <button id = "myButton" style = "background-color: #b58863" onclick="returnMove()">Return move</button>
+            <button id = "myButton1" style = "background-color: #b58863" onclick="nextMove()">Next move</button>
         </div>
 
         <div style="padding: 30px 50px 30px 50px;">
@@ -154,8 +154,13 @@
         let game_token = "{{game.token}}";
 
         let game_chessmoves = "{{game.moves}}";
+        let game_fens = "{{game.fens}}";
         console.log(`all_chessmoves = ${game_chessmoves}`);
         let chessmoves_array = game_chessmoves.split(" ");
+        let fens_array = game_fens.split("$");
+        for (let i = 0; i < fens_array.length; i++){
+            console.log(`chessmove = ${fens_array[i]}`);
+        }
         // for (let i = 0; i < chessmoves_array.length; i++){
         //     console.log(`chessmove = ${chessmoves_array[i]}`);
         // }
