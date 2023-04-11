@@ -153,6 +153,14 @@
 
         let game_token = "{{game.token}}";
 
+        let game_chessmoves = "{{game.moves}}";
+        console.log(`all_chessmoves = ${game_chessmoves}`);
+        let chessmoves_array = game_chessmoves.split(" ");
+        // for (let i = 0; i < chessmoves_array.length; i++){
+        //     console.log(`chessmove = ${chessmoves_array[i]}`);
+        // }
+
+
         let white_pieces_player = "{{game.white_pieces_player}}";
         let black_pieces_player = "{{game.black_pieces_player}}";
         let current_username = "{{user.username}}";

@@ -185,6 +185,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
 
+
             # print('play_connected_usernames_dict', play_connected_usernames_dict)
 
             self.all_chat_messages_array = await get_chat_messages_by_token(token=game_number)
@@ -287,7 +288,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             game = await get_game_by_token(token=token)
             moves_received_from_the_database = game.moves
-            game.moves = moves_received_from_the_database + f' {message}'
+            if moves_received_from_the_database != "":
+                game.moves = moves_received_from_the_database + f' {message}'
+            else:
+                game.moves = moves_received_from_the_database + message
+
             await update_game_data(game, update_fields=["moves"])
             print('allmoves: ', game.moves)
 

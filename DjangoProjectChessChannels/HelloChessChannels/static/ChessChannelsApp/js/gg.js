@@ -12,14 +12,12 @@ chatSocket.onmessage = function(e) {
         let current_time = new Date();
         let server_received_time = Date.parse(data.time);
         console.log(`time diff: ${current_time - server_received_time}ms.`);
-        let move = game.move({
-            from: data.move_from,
-            to: data.move_to,
-            promotion: 'q' // NOTE: always promote to a queen for example simplicity
-        })
+        let move = game.move(data.message);
 
-        board.position(game.fen())
+        board.position(game.fen());
     }
+
+
 
     if (data.type === 'chat'){
         let messages = document.getElementById('chat_messages');
@@ -252,3 +250,8 @@ let config = {
 
 board = Chessboard('myBoard', config);
 
+for (let i = 0; i < chessmoves_array.length; i++){
+    let move = game.move(chessmoves_array[i]);
+}
+
+board.position(game.fen(), false);
