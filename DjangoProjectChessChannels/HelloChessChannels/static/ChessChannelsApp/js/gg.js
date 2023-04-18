@@ -16,6 +16,61 @@ else{
 let fens_array_dynamic_index = null;
 let fens_array_index = fens_array.length - 1;
 
+class Timer{
+
+    constructor(time_ms, increment = 0) {
+        // this.minutes = Math.floor(time_ms / (60 * 1000))
+        // this.seconds = Math.floor((time_ms - this.minutes * 60 * 1000) / 1000);
+        // this.milliseconds = time_ms - this.minutes * 60 * 1000 - this.seconds * 1000;
+        // this.full_time = time_ms;
+        this.full_time = time_ms;
+        this.increment = increment;
+        this.timer_id = null;
+
+    }
+
+    print_time(){
+        let minutes = ~~(this.full_time / (60 * 1000));
+        let seconds = ~~(this.full_time / (1000)) - minutes * 60;
+        let milliseconds = this.full_time - minutes * (60 * 1000) - seconds * 1000;
+        // console.log(`${minutes}:${seconds}:${milliseconds}`);
+    }
+
+    start(){
+        console.log(this);
+        this.timer_id = setInterval(() => {
+            this.full_time -= 500;
+            // console.log(this.full_time);
+            this.print_time();
+            if (this.full_time <= 0){
+                this.stop()
+            }
+        }, 500);
+    }
+
+    stop(){
+        clearInterval(this.timer_id);
+    }
+
+    launch_another_timer(another_timer){
+        this.full_time += this.increment;
+        this.stop();
+        another_timer.start();
+    }
+}
+
+
+
+let white_pieces_timer = new Timer(white_pieces_timer_loaded, increment_loaded);
+let black_pieces_timer = new Timer(black_pieces_timer_loaded, increment_loaded);
+// setTimeout(function(){timer1.start()}, 1000);
+//
+// setTimeout(function(){timer1.launch_another_timer(timer2)}, 5000);
+//
+// setTimeout(function(){timer2.launch_another_timer(timer1)}, 10000);
+//
+// setTimeout(function(){timer1.stop()}, 15000);
+
 chatSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
     if (data.type === 'chessmove'){
@@ -24,6 +79,7 @@ chatSocket.onmessage = function(e) {
         let server_received_time = Date.parse(data.time);
         console.log(`time diff: ${current_time - server_received_time}ms.`);
         let move = game.move(data.message);
+        chessmoves_array.push(data.message);
 
         fens_array_dynamic.push(data.fen);
         console.log(`fens_array_dynamic = ${fens_array_dynamic}`);
@@ -34,6 +90,22 @@ chatSocket.onmessage = function(e) {
         fens_array_dynamic_index = fens_array_dynamic.length - 1;
 
         board.position(game.fen());
+
+        console.log(`chessmoves_array = ${chessmoves_array}`);
+        console.log(`white_full_time : ${data.white_full_time}`);
+        console.log(`black_full_time : ${data.black_full_time}`);
+
+        if (chessmoves_array.length === 1){
+            white_pieces_timer.launch_another_timer(black_pieces_timer);
+        }
+
+        else if (chessmoves_array.length % 2 === 0){  // move is up to white
+            black_pieces_timer.launch_another_timer(white_pieces_timer);
+        }
+
+        else{
+            white_pieces_timer.launch_another_timer(black_pieces_timer);
+        }
 
 
         if (game.game_over()){
@@ -158,7 +230,7 @@ function onDrop (source, target, piece) {
         to: target,
         promotion: 'q' // NOTE: always promote to a queen for example simplicity
     })
-    console.log(move)
+    // console.log(`chessmoves_array = ${chessmoves_array}`);
 
     // illegal move
     if (move === null) return 'snapback'
@@ -168,17 +240,8 @@ function onDrop (source, target, piece) {
         return 'snapback';}
 
     stack = game.history()
-    // if(game.game_over()){
-    //     const h = document.getElementById("myButton")
-    //     h.disabled = false
-    //     const h1 = document.getElementById("myButton1")
-    //     h1.disabled = false
-    //
-    //     alert(`${game.turn() === 'w'? "Black":"White"} is winner.`)
-    //     console.log(`${game.turn() === 'w'? "Black":"White"} is winner.`);
-    // }
 
-    // try to connect to server
+
     let current_time_hms = new Date().toISOString();
     console.log(current_time_hms);
     chatSocket.send(JSON.stringify({
@@ -190,6 +253,8 @@ function onDrop (source, target, piece) {
                         'username': current_username,
                         'time': current_time_hms,
                         'token': game_token,
+                        'white_full_time': white_pieces_timer.full_time,
+                        'black_full_time': black_pieces_timer.full_time,
                     }));
     console.log(move.san); // print chessmove into the console
     console.log(move.to);

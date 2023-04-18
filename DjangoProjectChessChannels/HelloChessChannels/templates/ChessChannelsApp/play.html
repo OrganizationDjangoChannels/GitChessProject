@@ -161,9 +161,11 @@
         for (let i = 0; i < fens_array.length; i++){
             console.log(`chessmove = ${fens_array[i]}`);
         }
-        // for (let i = 0; i < chessmoves_array.length; i++){
-        //     console.log(`chessmove = ${chessmoves_array[i]}`);
-        // }
+
+
+        let white_pieces_timer_loaded = Number("{{game.white_full_time}}");
+        let black_pieces_timer_loaded = Number("{{game.black_full_time}}");
+        let increment_loaded = Number("{{game.increment}}");
 
 
         let white_pieces_player = "{{game.white_pieces_player}}";

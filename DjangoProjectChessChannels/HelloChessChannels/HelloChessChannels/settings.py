@@ -33,7 +33,7 @@ DEBUG = True
 # Email address = DjangoChessProject@gmail.com
 # Password = main_admin_panel_all_roots
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "26.30.98.86"]
 
 
 # Application definition

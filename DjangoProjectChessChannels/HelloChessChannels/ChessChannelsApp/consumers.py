@@ -13,7 +13,7 @@ players_searching_set = set()
 players_searching_dict = {'5+3': set(), '3+2': set(), '1+1': set(), '3+0': set(), '5+0': set(), }
 players_pairs = {}
 play_connected_usernames_dict = dict()    # {token: set(), }
-
+game_modes = ['bullet', 'blitz', 'rapid', 'classical', 'user_mode']
 
 
 # game_object = Game.objects.get(pk=1)
@@ -24,10 +24,15 @@ def get_game_by_token(token):
     return game
 
 @database_sync_to_async
-def write_game_into_database(token, white_pieces_player, black_pieces_player):
+def write_game_into_database(token, white_pieces_player, black_pieces_player,
+                             white_full_time, black_full_time, game_mode, increment):
     game = Game(token=token,
                 white_pieces_player=white_pieces_player,
                 black_pieces_player=black_pieces_player,
+                white_full_time=white_full_time,
+                black_full_time=black_full_time,
+                game_mode=game_mode,
+                increment=increment,
                 )
 
     game.save()
@@ -90,6 +95,7 @@ async def simple_matchmaking(server):  # temporary
     print('players_searching_dict', players_searching_dict)
     for key in players_searching_dict.keys():
         time_control_players_set = players_searching_dict[key]
+
         if len(time_control_players_set) >= 2:
             white_pieces_player = time_control_players_set.pop()  # random choice
             black_pieces_player = time_control_players_set.pop()  # random choice
@@ -112,8 +118,25 @@ async def simple_matchmaking(server):  # temporary
 
                 play_connected_usernames_dict[game_token] = set()
 
+                white_full_time = int(key[0]) * 60 * 1000  # time control
+                black_full_time = int(key[0]) * 60 * 1000  # time control
+                increment = int(key[2]) * 1000  # increment
+
+                # supposed that white_full_time = black_full_time
+                if 0 < white_full_time < 1 * 60 * 1000 + 1 * 1000:
+                    game_mode = game_modes[0]  # bullet
+                elif white_full_time < 5 * 60 * 1000 + 5 * 1000:
+                    game_mode = game_modes[1]  # blitz
+                elif white_full_time < 15 * 60 * 1000 + 15 * 1000:
+                    game_mode = game_modes[2]  # rapid
+                elif white_full_time < 90 * 60 * 1000 + 30 * 1000:
+                    game_mode = game_modes[3]  # classical
+                else:
+                    game_mode = game_modes[4]  # user_mode
+
                 # writing into the database
-                await write_game_into_database(game_token, white_pieces_player, black_pieces_player)
+                await write_game_into_database(game_token, white_pieces_player, black_pieces_player,
+                                               white_full_time, black_full_time, game_mode, increment)
 
                 await server.channel_layer.group_send(
                     server.room_group_name,
@@ -264,6 +287,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         type = text_data_json['type']
 
 
+
         if type == 'chessmove':
             message = text_data_json["message"]
             username = text_data_json["username"]
@@ -272,6 +296,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             fen = text_data_json["fen"]
             move_to = text_data_json["move_to"]
             move_from = text_data_json["move_from"]
+            white_full_time = text_data_json["white_full_time"]
+            black_full_time = text_data_json["black_full_time"]
             print(f'chessmove incoming: {text_data_json["message"]} from {text_data_json["username"]}'
                   f' at {text_data_json["time"]}')
             await self.channel_layer.group_send(
@@ -284,6 +310,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'move_from': move_from,
                     'username': username,
                     'time': time,
+                    'white_full_time': white_full_time,
+                    'black_full_time': black_full_time,
                     'token': token,
                 }
             )
@@ -302,7 +330,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             else:
                 game.fens = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1$' + fen
 
-            await update_game_data(game, update_fields=["moves", "fens"])
+            await update_game_data(game, update_fields=["moves", "fens", "white_full_time", "black_full_time"])
             print('allmoves: ', game.moves)
 
 
@@ -354,6 +382,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         fen = event['fen']
         move_to = event['move_to']
         move_from = event['move_from']
+        white_full_time = event['white_full_time']
+        black_full_time = event['black_full_time']
         await self.send(text_data=json.dumps({
             'type': 'chessmove',
             'message': message,
@@ -362,6 +392,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'move_from': move_from,
             'username': username,
             'time': time,
+            'white_full_time': white_full_time,
+            'black_full_time': black_full_time,
             'token': token,
         }))
 
