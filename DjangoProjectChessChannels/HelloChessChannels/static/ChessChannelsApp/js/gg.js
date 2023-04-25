@@ -6,6 +6,8 @@ const whiteSquareGrey = '#a9a9a9'
 const blackSquareGrey = '#696969'
 let fens_array_dynamic = null;
 
+let chessmove_audio = new Audio('/static/ChessChannelsApp/sounds/chessmove_sound.mp3');
+
 if (fens_array.length === 1){
     fens_array_dynamic = ['rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'];
 }
@@ -54,6 +56,7 @@ class Timer{
         this.timer_id = null;
         this.print_id = null;
         this.show_id = null;
+        this.disabled = false;
 
     }
 
@@ -93,19 +96,37 @@ class Timer{
     }
 
     start(){
+        if (!(this.disabled)){
+            this.print_time();
+            this.timer_id = setInterval(() => {
 
-        this.print_time();
-        this.timer_id = setInterval(() => {
+                this.full_time -= 100;
+                // console.log(this.full_time);
 
-            this.full_time -= 100;
-            // console.log(this.full_time);
+                if (this.full_time <= 0){
+                    this.full_time = 0;
 
-            if (this.full_time <= 0){
-                this.full_time = 0;
+                    if (white_pieces_timer.full_time <= 0){
+                        chatSocket.send(JSON.stringify({
+                            'type': 'game_result',
+                            'token': game_token,
+                            'result': 'black won by timeout.'
+                        }));
+                    }
 
-                this.stop();
-            }
-        }, 100);
+                    if (black_pieces_timer.full_time <= 0){
+                        chatSocket.send(JSON.stringify({
+                            'type': 'game_result',
+                            'token': game_token,
+                            'result': 'white won by timeout.'
+                        }));
+                    }
+
+                    this.stop();
+                }
+            }, 100);
+        }
+
     }
 
     stop(){
@@ -121,15 +142,6 @@ class Timer{
     }
 }
 
-game.game_over = function() {
-      return chessmoves_array.length >= 100 ||
-             game.in_checkmate() ||
-             game.in_stalemate() ||
-             game.insufficient_material() ||
-             white_pieces_timer.full_time <= 0 ||
-             black_pieces_timer.full_time <= 0 ||
-             game.in_threefold_repetition();
-}
 
 let white_pieces_timer = new Timer(white_pieces_timer_loaded, increment_loaded);
 let black_pieces_timer = new Timer(black_pieces_timer_loaded, increment_loaded);
@@ -364,6 +376,7 @@ function onDrop (source, target, piece) {
                     }));
     console.log(move.san); // print chessmove into the console
     console.log(move.to);
+    chessmove_audio.play();
 
 
 }
@@ -469,6 +482,36 @@ board.position(game.fen(), false);
 
 if (game.game_over()){
 
+    white_pieces_timer.stop();
+    black_pieces_timer.stop();
+    white_pieces_timer.disabled = true;
+    black_pieces_timer.disabled = true;
+
 
     console.log(`${game.turn() === 'w'? "Black":"White"} is winner.`);
+
+    if (game.turn() === 'w' && game.in_checkmate()){
+        chatSocket.send(JSON.stringify({
+            'type': 'game_result',
+            'token': game_token,
+            'result': 'black won by checkmate.'
+        }));
+    }
+
+    if (game.turn() === 'b' && game.in_checkmate()){
+        chatSocket.send(JSON.stringify({
+            'type': 'game_result',
+            'token': game_token,
+            'result': 'white won by checkmate.'
+        }));
+    }
+
+    if (game.in_draw()){
+        chatSocket.send(JSON.stringify({
+            'type': 'game_result',
+            'token': game_token,
+            'result': 'draw'
+        }));
+    }
+
 }

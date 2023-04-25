@@ -286,6 +286,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         type = text_data_json['type']
 
+        if type == 'game_result':
+            token = text_data_json["token"]
+            result = text_data_json["result"]
+            game = await get_game_by_token(token=token)
+            game.result = result
+            game.isActive = False
+            await update_game_data(game, update_fields=["result", "isActive"])
+
         if type == 'send_time_to_the_server':
             token = text_data_json["token"]
             white_full_time = text_data_json["white_full_time"]
