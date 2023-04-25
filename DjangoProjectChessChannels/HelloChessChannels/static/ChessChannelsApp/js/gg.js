@@ -16,6 +16,8 @@ else{
 let fens_array_dynamic_index = null;
 let fens_array_index = fens_array.length - 1;
 
+
+
 class Timer{
 
     constructor(time_ms, increment = 0) {
@@ -26,30 +28,65 @@ class Timer{
         this.full_time = time_ms;
         this.increment = increment;
         this.timer_id = null;
+        this.print_id = null;
+        this.show_id = null;
 
     }
 
     print_time(){
-        let minutes = ~~(this.full_time / (60 * 1000));
-        let seconds = ~~(this.full_time / (1000)) - minutes * 60;
-        let milliseconds = this.full_time - minutes * (60 * 1000) - seconds * 1000;
-        // console.log(`${minutes}:${seconds}:${milliseconds}`);
+        this.print_id = setInterval(() => {
+            let minutes = ~~(this.full_time / (60 * 1000));
+            let seconds = ~~(this.full_time / (1000)) - minutes * 60;
+            let milliseconds = this.full_time - minutes * (60 * 1000) - seconds * 1000;
+            if (minutes > 0){
+                console.log(`${~~(minutes / 10)}${minutes % 10}:${~~(seconds / 10)}${seconds % 10}`);
+
+            }
+            else{
+                console.log(`00:${~~(seconds / 10)}${seconds % 10}:${~~(milliseconds / 10)}${milliseconds % 10}`);
+            }
+
+        }, 1000);
+
+    }
+
+    show(element_id){
+        this.show_id = setInterval(() => {
+            let minutes = ~~(this.full_time / (60 * 1000));
+            let seconds = ~~(this.full_time / (1000)) - minutes * 60;
+            let milliseconds = this.full_time - minutes * (60 * 1000) - seconds * 1000;
+            if (minutes > 0){
+                // console.log(`${~~(minutes / 10)}${minutes % 10}:${~~(seconds / 10)}${seconds % 10}`);
+                element_id.innerText = `${~~(minutes / 10)}${minutes % 10}:${~~(seconds / 10)}${seconds % 10}`;
+
+            }
+            else{
+                // console.log(`00:${~~(seconds / 10)}${seconds % 10}:${~~(milliseconds / 10)}${milliseconds % 10}`);
+                element_id.innerText = `${~~(minutes / 10)}${minutes % 10}:${~~(seconds / 10)}${seconds % 10}`;
+            }
+
+        }, 1000);
     }
 
     start(){
-        console.log(this);
+
+        this.print_time();
         this.timer_id = setInterval(() => {
-            this.full_time -= 500;
+
+            this.full_time -= 100;
             // console.log(this.full_time);
-            this.print_time();
+
             if (this.full_time <= 0){
-                this.stop()
+                this.full_time = 0;
+                this.stop();
             }
-        }, 500);
+        }, 100);
     }
 
     stop(){
         clearInterval(this.timer_id);
+        clearInterval(this.print_id);
+        // clearInterval(this.show_id);
     }
 
     launch_another_timer(another_timer){
@@ -63,6 +100,8 @@ class Timer{
 
 let white_pieces_timer = new Timer(white_pieces_timer_loaded, increment_loaded);
 let black_pieces_timer = new Timer(black_pieces_timer_loaded, increment_loaded);
+white_pieces_timer.show(white_timer_div);
+black_pieces_timer.show(black_timer_div);
 // setTimeout(function(){timer1.start()}, 1000);
 //
 // setTimeout(function(){timer1.launch_another_timer(timer2)}, 5000);
@@ -70,6 +109,37 @@ let black_pieces_timer = new Timer(black_pieces_timer_loaded, increment_loaded);
 // setTimeout(function(){timer2.launch_another_timer(timer1)}, 10000);
 //
 // setTimeout(function(){timer1.stop()}, 15000);
+
+white_timer_div = document.getElementById('white_timer_div');
+black_timer_div = document.getElementById('black_timer_div');
+white_timer_div.innerText = String(white_pieces_timer_loaded);
+black_timer_div.innerText = String(black_pieces_timer_loaded);
+
+let send_time_to_the_server = setInterval( () => {
+    setTimeout( () => {chatSocket.send(JSON.stringify({
+        'type': 'send_time_to_the_server',
+        'token': game_token,
+        'white_full_time': white_pieces_timer.full_time,
+        'black_full_time': black_pieces_timer.full_time,
+    }));}, 500);
+
+    console.log('time has been sent to the server');
+}, 500);
+
+
+
+
+
+
+
+if (fens_array_dynamic.length > 1){
+    if (fens_array_dynamic.length % 2 === 0){
+        black_pieces_timer.start();
+    }
+    else{
+        white_pieces_timer.start();
+    }
+}
 
 chatSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
@@ -97,14 +167,17 @@ chatSocket.onmessage = function(e) {
 
         if (chessmoves_array.length === 1){
             white_pieces_timer.launch_another_timer(black_pieces_timer);
+            // black_pieces_timer.show(black_timer_div);
         }
 
-        else if (chessmoves_array.length % 2 === 0){  // move is up to white
+        else if (chessmoves_array.length % 2 === 0 && chessmoves_array.length > 1){  // move is up to white
             black_pieces_timer.launch_another_timer(white_pieces_timer);
+            // white_pieces_timer.show(white_timer_div);
         }
 
-        else{
+        else if (chessmoves_array.length > 1){
             white_pieces_timer.launch_another_timer(black_pieces_timer);
+            black_pieces_timer.show(black_timer_div);
         }
 
 

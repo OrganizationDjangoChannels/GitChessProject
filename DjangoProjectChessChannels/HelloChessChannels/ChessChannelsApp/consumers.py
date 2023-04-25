@@ -286,7 +286,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         type = text_data_json['type']
 
+        if type == 'send_time_to_the_server':
+            token = text_data_json["token"]
+            white_full_time = text_data_json["white_full_time"]
+            black_full_time = text_data_json["black_full_time"]
 
+            game = await get_game_by_token(token=token)
+            game.white_full_time = white_full_time
+            game.black_full_time = black_full_time
+            await update_game_data(game, update_fields=["white_full_time", "black_full_time"])
 
         if type == 'chessmove':
             message = text_data_json["message"]
@@ -296,10 +304,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
             fen = text_data_json["fen"]
             move_to = text_data_json["move_to"]
             move_from = text_data_json["move_from"]
-            white_full_time = text_data_json["white_full_time"]
-            black_full_time = text_data_json["black_full_time"]
+            white_full_time = int(text_data_json["white_full_time"])
+            black_full_time = int(text_data_json["black_full_time"])
             print(f'chessmove incoming: {text_data_json["message"]} from {text_data_json["username"]}'
-                  f' at {text_data_json["time"]}')
+                  f' at {text_data_json["time"]} ')
+            print(f'white_full_time {white_full_time}')
+            print(f'black_full_time {black_full_time}')
+
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -329,6 +340,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 game.fens = fens_received_from_the_database + f'${fen}'
             else:
                 game.fens = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1$' + fen
+
+            game.white_full_time = white_full_time
+            game.black_full_time = black_full_time
 
             await update_game_data(game, update_fields=["moves", "fens", "white_full_time", "black_full_time"])
             print('allmoves: ', game.moves)

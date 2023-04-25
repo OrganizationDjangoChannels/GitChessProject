@@ -82,10 +82,14 @@
 
     <div class="main_div_flexbox_container">
 
+
+
         <div style="padding: 30px;">
             <div id="myBoard" style="width: 500px"></div>
             <button id = "myButton" style = "background-color: #b58863" onclick="returnMove()">Return move</button>
             <button id = "myButton1" style = "background-color: #b58863" onclick="nextMove()">Next move</button>
+            <div id="white_timer_div" style="color: white"></div>
+            <div id="black_timer_div" style="color: white"></div>
         </div>
 
         <div style="padding: 30px 50px 30px 50px;">
@@ -136,6 +140,9 @@
     </div>
 
 
+
+
+
     {% endblock main_content %}
 
 
@@ -157,6 +164,9 @@
         let game_fens = "{{game.fens}}";
         console.log(`all_chessmoves = ${game_chessmoves}`);
         let chessmoves_array = game_chessmoves.split(" ");
+        if (chessmoves_array[0] === ''){
+            chessmoves_array = [];
+        }
         let fens_array = game_fens.split("$");
         for (let i = 0; i < fens_array.length; i++){
             console.log(`chessmove = ${fens_array[i]}`);
