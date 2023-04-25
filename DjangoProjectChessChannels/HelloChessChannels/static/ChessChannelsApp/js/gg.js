@@ -16,6 +16,30 @@ else{
 let fens_array_dynamic_index = null;
 let fens_array_index = fens_array.length - 1;
 
+let div_myBoard = document.getElementById("div_myBoard");
+
+let white_timer_div = document.createElement("div");
+white_timer_div.className = "timer";
+white_timer_div.id = "white_timer_div";
+
+let black_timer_div = document.createElement("div");
+black_timer_div.className = "timer";
+black_timer_div.id = "black_timer_div";
+
+if (current_username === white_pieces_player){
+    div_myBoard.prepend(black_timer_div);
+    div_myBoard.append(white_timer_div);
+}
+
+else if (current_username === black_pieces_player){
+    div_myBoard.prepend(white_timer_div);
+    div_myBoard.append(black_timer_div);
+}
+else{
+    div_myBoard.prepend(black_timer_div);
+    div_myBoard.append(white_timer_div);
+}
+
 
 
 class Timer{
@@ -78,6 +102,7 @@ class Timer{
 
             if (this.full_time <= 0){
                 this.full_time = 0;
+
                 this.stop();
             }
         }, 100);
@@ -96,7 +121,15 @@ class Timer{
     }
 }
 
-
+game.game_over = function() {
+      return chessmoves_array.length >= 100 ||
+             game.in_checkmate() ||
+             game.in_stalemate() ||
+             game.insufficient_material() ||
+             white_pieces_timer.full_time <= 0 ||
+             black_pieces_timer.full_time <= 0 ||
+             game.in_threefold_repetition();
+}
 
 let white_pieces_timer = new Timer(white_pieces_timer_loaded, increment_loaded);
 let black_pieces_timer = new Timer(black_pieces_timer_loaded, increment_loaded);
@@ -110,8 +143,8 @@ black_pieces_timer.show(black_timer_div);
 //
 // setTimeout(function(){timer1.stop()}, 15000);
 
-white_timer_div = document.getElementById('white_timer_div');
-black_timer_div = document.getElementById('black_timer_div');
+// white_timer_div = document.getElementById('white_timer_div');
+// black_timer_div = document.getElementById('black_timer_div');
 white_timer_div.innerText = String(white_pieces_timer_loaded);
 black_timer_div.innerText = String(black_pieces_timer_loaded);
 

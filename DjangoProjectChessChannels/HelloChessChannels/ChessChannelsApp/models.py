@@ -16,7 +16,8 @@ class Game(models.Model):
     moves = models.TextField(blank=True)
     fens = models.TextField(blank=True)
     time_create = models.DateTimeField(auto_now_add=True)
-    isActive = models.BooleanField(blank=True, null=True)
+    isActive = models.BooleanField(default=True)
+    result = models.CharField(default="not_finished", max_length=30)
 
 
 class Player(models.Model):

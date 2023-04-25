@@ -60,6 +60,10 @@
             justify-content: center;
             padding: 30px 10px 30px 10px;
         }
+
+        .timer{
+            color: white;
+        }
     </style>
 
     {% endblock styles %}
@@ -84,12 +88,12 @@
 
 
 
-        <div style="padding: 30px;">
+        <div style="padding: 30px;" id="div_myBoard">
+
             <div id="myBoard" style="width: 500px"></div>
             <button id = "myButton" style = "background-color: #b58863" onclick="returnMove()">Return move</button>
             <button id = "myButton1" style = "background-color: #b58863" onclick="nextMove()">Next move</button>
-            <div id="white_timer_div" style="color: white"></div>
-            <div id="black_timer_div" style="color: white"></div>
+
         </div>
 
         <div style="padding: 30px 50px 30px 50px;">
