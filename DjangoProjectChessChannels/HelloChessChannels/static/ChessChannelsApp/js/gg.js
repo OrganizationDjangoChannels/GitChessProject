@@ -47,10 +47,7 @@ else{
 class Timer{
 
     constructor(time_ms, increment = 0) {
-        // this.minutes = Math.floor(time_ms / (60 * 1000))
-        // this.seconds = Math.floor((time_ms - this.minutes * 60 * 1000) / 1000);
-        // this.milliseconds = time_ms - this.minutes * 60 * 1000 - this.seconds * 1000;
-        // this.full_time = time_ms;
+
         this.full_time = time_ms;
         this.increment = increment;
         this.timer_id = null;
@@ -70,7 +67,7 @@ class Timer{
 
             }
             else{
-                console.log(`00:${~~(seconds / 10)}${seconds % 10}:${~~(milliseconds / 10)}${milliseconds % 10}`);
+                console.log(`00:${~~(seconds / 10)}${seconds % 10}:${~~(milliseconds / 100)}${~~((milliseconds % 100) / 10)}`);
             }
 
         }, 1000);
@@ -82,17 +79,17 @@ class Timer{
             let minutes = ~~(this.full_time / (60 * 1000));
             let seconds = ~~(this.full_time / (1000)) - minutes * 60;
             let milliseconds = this.full_time - minutes * (60 * 1000) - seconds * 1000;
-            if (minutes > 0){
+            if (minutes >= 1){
                 // console.log(`${~~(minutes / 10)}${minutes % 10}:${~~(seconds / 10)}${seconds % 10}`);
                 element_id.innerText = `${~~(minutes / 10)}${minutes % 10}:${~~(seconds / 10)}${seconds % 10}`;
 
             }
             else{
                 // console.log(`00:${~~(seconds / 10)}${seconds % 10}:${~~(milliseconds / 10)}${milliseconds % 10}`);
-                element_id.innerText = `${~~(minutes / 10)}${minutes % 10}:${~~(seconds / 10)}${seconds % 10}`;
+                element_id.innerText = `00:${~~(seconds / 10)}${seconds % 10}:${~~(milliseconds / 100)}${~~((milliseconds % 100) / 10)}`;
             }
 
-        }, 1000);
+        }, 200);
     }
 
     start(){
@@ -110,7 +107,7 @@ class Timer{
                         chatSocket.send(JSON.stringify({
                             'type': 'game_result',
                             'token': game_token,
-                            'result': 'black won by timeout.'
+                            'result': 'Black won by timeout.'
                         }));
                     }
 
@@ -118,7 +115,7 @@ class Timer{
                         chatSocket.send(JSON.stringify({
                             'type': 'game_result',
                             'token': game_token,
-                            'result': 'white won by timeout.'
+                            'result': 'White won by timeout.'
                         }));
                     }
 
@@ -145,20 +142,32 @@ class Timer{
 
 let white_pieces_timer = new Timer(white_pieces_timer_loaded, increment_loaded);
 let black_pieces_timer = new Timer(black_pieces_timer_loaded, increment_loaded);
-white_pieces_timer.show(white_timer_div);
-black_pieces_timer.show(black_timer_div);
-// setTimeout(function(){timer1.start()}, 1000);
-//
-// setTimeout(function(){timer1.launch_another_timer(timer2)}, 5000);
-//
-// setTimeout(function(){timer2.launch_another_timer(timer1)}, 10000);
-//
-// setTimeout(function(){timer1.stop()}, 15000);
 
-// white_timer_div = document.getElementById('white_timer_div');
-// black_timer_div = document.getElementById('black_timer_div');
-white_timer_div.innerText = String(white_pieces_timer_loaded);
-black_timer_div.innerText = String(black_pieces_timer_loaded);
+if (game_result === "not_finished"){
+   white_pieces_timer.show(white_timer_div);
+    black_pieces_timer.show(black_timer_div);
+
+    game_status_div.innerText = "the game is still on";
+}
+else{
+    game_status_div.innerText = game_result;
+}
+
+function transform_full_time(full_time){
+    let minutes = ~~(full_time / (60 * 1000)); let seconds = ~~(full_time / (1000)) - minutes * 60;
+    let milliseconds = full_time - minutes * (60 * 1000) - seconds * 1000;
+    if (minutes > 0){
+        return `${~~(minutes / 10)}${minutes % 10}:${~~(seconds / 10)}${seconds % 10}`;
+
+    }
+    else{
+        return `00:${~~(seconds / 10)}${seconds % 10}:${~~(milliseconds / 100)}${~~((milliseconds % 100) / 10)}`;
+    }
+}
+
+white_timer_div.innerText = transform_full_time(white_pieces_timer_loaded);
+black_timer_div.innerText = transform_full_time(black_pieces_timer_loaded);
+
 
 let send_time_to_the_server = setInterval( () => {
     setTimeout( () => {chatSocket.send(JSON.stringify({
@@ -188,6 +197,18 @@ if (fens_array_dynamic.length > 1){
 
 chatSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
+    if (data.type === 'game_result'){
+        let result = data.result;
+        if (result !== 'not_finished'){  // game was finished
+            game_status_div.innerText = result;
+            clearInterval(send_time_to_the_server);
+            white_pieces_timer.stop();
+            black_pieces_timer.stop();
+            white_pieces_timer.disabled = true;
+            black_pieces_timer.disabled = true;
+        }
+    }
+
     if (data.type === 'chessmove'){
         console.log(`received ${data.message} from ${data.username} at ${data.time}`);
         let current_time = new Date();
@@ -378,6 +399,40 @@ function onDrop (source, target, piece) {
     console.log(move.to);
     chessmove_audio.play();
 
+    if (game.game_over()){
+        white_pieces_timer.stop();
+        black_pieces_timer.stop();
+        white_pieces_timer.disabled = true;
+        black_pieces_timer.disabled = true;
+
+        console.log(`${game.turn() === 'w'? "Black":"White"} is winner.`);
+
+        if (game.turn() === 'w' && game.in_checkmate()){
+            chatSocket.send(JSON.stringify({
+                'type': 'game_result',
+                'token': game_token,
+                'result': 'Black won by checkmate.'
+            }));
+        }
+
+        if (game.turn() === 'b' && game.in_checkmate()){
+            chatSocket.send(JSON.stringify({
+                'type': 'game_result',
+                'token': game_token,
+                'result': 'White won by checkmate.'
+            }));
+        }
+
+        if (game.in_draw()){
+            chatSocket.send(JSON.stringify({
+                'type': 'game_result',
+                'token': game_token,
+                'result': 'The game ended in a draw.'
+            }));
+        }
+
+    }
+
 
 }
 
@@ -480,38 +535,38 @@ for (let i = 0; i < chessmoves_array.length; i++){
 
 board.position(game.fen(), false);
 
-if (game.game_over()){
-
-    white_pieces_timer.stop();
-    black_pieces_timer.stop();
-    white_pieces_timer.disabled = true;
-    black_pieces_timer.disabled = true;
-
-
-    console.log(`${game.turn() === 'w'? "Black":"White"} is winner.`);
-
-    if (game.turn() === 'w' && game.in_checkmate()){
-        chatSocket.send(JSON.stringify({
-            'type': 'game_result',
-            'token': game_token,
-            'result': 'black won by checkmate.'
-        }));
-    }
-
-    if (game.turn() === 'b' && game.in_checkmate()){
-        chatSocket.send(JSON.stringify({
-            'type': 'game_result',
-            'token': game_token,
-            'result': 'white won by checkmate.'
-        }));
-    }
-
-    if (game.in_draw()){
-        chatSocket.send(JSON.stringify({
-            'type': 'game_result',
-            'token': game_token,
-            'result': 'draw'
-        }));
-    }
-
-}
+// if (game.game_over()){
+//
+//     white_pieces_timer.stop();
+//     black_pieces_timer.stop();
+//     white_pieces_timer.disabled = true;
+//     black_pieces_timer.disabled = true;
+//
+//
+//     console.log(`${game.turn() === 'w'? "Black":"White"} is winner.`);
+//
+//     if (game.turn() === 'w' && game.in_checkmate()){
+//         chatSocket.send(JSON.stringify({
+//             'type': 'game_result',
+//             'token': game_token,
+//             'result': 'black won by checkmate.'
+//         }));
+//     }
+//
+//     if (game.turn() === 'b' && game.in_checkmate()){
+//         chatSocket.send(JSON.stringify({
+//             'type': 'game_result',
+//             'token': game_token,
+//             'result': 'white won by checkmate.'
+//         }));
+//     }
+//
+//     if (game.in_draw()){
+//         chatSocket.send(JSON.stringify({
+//             'type': 'game_result',
+//             'token': game_token,
+//             'result': 'draw'
+//         }));
+//     }
+//
+// }

@@ -119,6 +119,10 @@
                 <span id="number_of_viewers">0</span>
             </div>
 
+            <div id="game_status" style="color:white; padding: 10px;">
+
+            </div>
+
             <div class="chat_div_class">
                 <div>
 
@@ -181,6 +185,9 @@
         let black_pieces_timer_loaded = Number("{{game.black_full_time}}");
         let increment_loaded = Number("{{game.increment}}");
 
+        let game_result = "{{game.result}}";
+        let game_isActive = "{{game.isActive}}";
+        let game_status_div = document.getElementById("game_status");
 
         let white_pieces_player = "{{game.white_pieces_player}}";
         let black_pieces_player = "{{game.black_pieces_player}}";

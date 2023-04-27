@@ -293,6 +293,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
             game.result = result
             game.isActive = False
             await update_game_data(game, update_fields=["result", "isActive"])
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'share_game_result',
+                    'token': token,
+                    'result': result,
+                }
+            )
 
         if type == 'send_time_to_the_server':
             token = text_data_json["token"]
@@ -303,6 +311,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             game.white_full_time = white_full_time
             game.black_full_time = black_full_time
             await update_game_data(game, update_fields=["white_full_time", "black_full_time"])
+
 
         if type == 'chessmove':
             message = text_data_json["message"]
@@ -395,6 +404,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
             await write_into_chat_messages_by_token(token=token, username=username, message=message)
+
+    async def share_game_result(self, event):
+
+        token = event['token']
+        result = event['result']
+        await self.send(text_data=json.dumps({
+            'type': 'game_result',
+            'token': token,
+            'result': result,
+        }))
 
     async def chessmove_message(self, event):
         message = event['message']
