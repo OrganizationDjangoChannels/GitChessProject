@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+{% extends "ChessChannelsApp/base.html" %}
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}}</title>
+
+    {% block styles %}
+
+    <link href="{% static 'ChessChannelsApp/css/styles.css' %}" rel="stylesheet">
+    <link href="{% static 'ChessChannelsApp/css/play_styles.css' %}" rel="stylesheet">
+    <link href="{% static 'ChessChannelsApp/css/animations.css' %}" rel="stylesheet">
+    <link href="{% static 'ChessChannelsApp/css/chessboard-1.0.0.css' %}" rel="stylesheet">
+
+    {% endblock styles %}
+
+    {% block before_body_scripts %}
+
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="{% static 'ChessChannelsApp/js/chessboard.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"
+            integrity="sha384-s3XgLpvmHyscVpijnseAmye819Ee3yaGa8NxstkJVyA6nuDFjt59u1QvuEl/mecz"
+            crossorigin="anonymous">
+    </script>
+
+    {% endblock before_body_scripts %}
+
+</head>
+
+<body>
+
+
+    {% block main_content %}
+        <div style="padding: 30px 50px 30px 50px;">
+            Puzzles
+        </div>
+
+        <div id="myBoard" style="width: 500px"></div>
+    {% endblock main_content %}
+
+    {% block after_body_scripts %}
+
+
+    <script>
+        let token = "{{puzzle.token}}";
+        let fen = "{{puzzle.fens}}";
+        let moves = "{{puzzle.moves}}";
+        let board_orientation_loaded = "{{puzzle.board_orientation}}";
+
+        let moves_array = moves.split(" ");
+        let move_index = 0;
+        console.log(moves_array);
+        const PuzzleSocket = new WebSocket(
+            'ws://'
+            + window.location.host
+            + '/ws/socket-server/puzzle/'
+            + "{{puzzle.token}}"
+            + '/'
+        );
+        console.log(token);
+        console.log(fen);
+        console.log(moves);
+    </script>
+
+    <script src="{% static 'ChessChannelsApp/js/puzzle.js' %}"></script>
+
+    {% endblock after_body_scripts %}
+
+</body>
+
+</html>

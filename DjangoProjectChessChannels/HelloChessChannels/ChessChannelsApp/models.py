@@ -40,3 +40,12 @@ class ChessMoves(models.Model):
     move = models.CharField(max_length=255)
     username = models.CharField(max_length=255)
 
+
+class Puzzle(models.Model):
+    token = models.CharField(max_length=255)
+    board_orientation = models.CharField(max_length=30, default='white')
+    fens = models.CharField(max_length=255)
+    moves = models.CharField(max_length=255)
+    users = models.TextField(blank=True)
+    puzzle_rating = models.FloatField(default=1000.0)
+

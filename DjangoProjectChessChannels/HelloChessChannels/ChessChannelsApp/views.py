@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import Http404
 from django.core import serializers
+from secrets import token_urlsafe
 
 from .forms import *
 from .models import *
@@ -13,6 +14,34 @@ import re
 username_pattern = re.compile(r'^[A-Za-z0-9_-]{6,20}$')
 # password_pattern = re.compile(r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
 email_pattern = re.compile("^[a-zA-z0-9\.\-_]+@{1}[a-zA-Z0-9]+\.{1}[a-zA-Z]{2,3}$")
+
+def add_puzzles():
+    puzzle_token = token_urlsafe(16)  # url-token
+    moves = "Rf1+ Nf2 Rxf2+ Qxf2 Qe4#"
+    fens = '8/7k/1p6/5p2/1P6/4QKPN/2q5/2r5 b - - 0 1'
+    board_orientation = "black"
+    puzzle = Puzzle(
+        token=puzzle_token,
+        moves=moves,
+        fens=fens,
+        board_orientation=board_orientation,
+    )
+
+    puzzle.save()
+
+
+def show_puzzle(request, puzzle_number=1):
+    data = {'title': 'show_puzzle'}
+    # add_puzzles()
+    try:
+        puzzle = Puzzle.objects.get(token=puzzle_number)
+        data['puzzle'] = puzzle
+        print(f'puzzle {puzzle.token}')
+
+    except Puzzle.DoesNotExist:
+        raise Http404
+
+    return render(request, 'ChessChannelsApp/puzzle.html', context=data)
 
 
 def localgame(request):
@@ -44,18 +73,6 @@ def base(request):
 
 
 def index(request):
-    # if request.method == 'GET':
-    #     if request.user.is_authenticated:
-    #         print('launched')
-    #
-    #         try:
-    #             value = request.GET['time_control']
-    #             print(value)
-    #             players.add(request.user.id)
-    #             print(players)
-    #
-    #         except MultiValueDictKeyError as ex:
-    #             print("key_error")
 
     if request.method == 'POST':
         print(request.POST)

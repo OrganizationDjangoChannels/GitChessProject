@@ -474,7 +474,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # print(game.chat_messages)
 
 
-
 class MatchmakingConsumer(AsyncWebsocketConsumer):
     async def connect(self):
 
@@ -550,8 +549,20 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         }))
 
 
+class PuzzleConsumer(WebsocketConsumer):
+
+    def connect(self):
+
+        self.user = self.scope["user"]
+        self.accept()
+
+        print(f'{self.user} was connected with the PuzzleConsumer')
+
+    def disconnect(self, code):
+        print(f'{self.user} was disconnected with code {code}')
 
 
-
+    def receive(self, text_data=None, bytes_data=None):
+        pass
 
 
