@@ -54,7 +54,11 @@ function onDrop (source, target, piece) {
     // illegal move
     if (move === null) return 'snapback'
 
-    if (move.san === moves_array[move_index]){
+
+    let possible_player_moves = new Set(moves_array[move_index].split("|"));
+
+    if (possible_player_moves.has(move.san)){  // if the player move is one of the possible right moves
+
         if (move_index < moves_array.length - 1){
             game.move(moves_array[move_index + 1])
         }

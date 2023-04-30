@@ -1,0 +1,3 @@
+4R1B1/6bR/1B1k4/3PN3/4p3/4P3/7p/7K w - - 0 1 & Rf8 Kxe5 Bc7# & white
+5K2/8/1N2p3/2P1k2n/1B6/p7/1bB3N1/5Q2 w - - 0 1 & Qc1 Kf6 Nd7# & white
+4B3/1N6/1pn5/5N1Q/2k1nP2/K2p4/1P6/8 w - - 0 1 & Qf3 Nd4 Ne3# & white
