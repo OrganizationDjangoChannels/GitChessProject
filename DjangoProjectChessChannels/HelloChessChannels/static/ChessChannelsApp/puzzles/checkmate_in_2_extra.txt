@@ -1,0 +1,10 @@
+3R4/b2qR3/2r4p/1Pnk2p1/1Q1N2N1/1r2P2K/B1b4B/4n3 w - - 0 1 & Ne2 Na4 Re5# & white
+kB6/1pRNp3/1P2P3/3b3R/3p2P1/1q3BpK/5b1P/2rQn3 w - - 0 1 & Rh8 g2 Ba7# & white
+5bk1/R4p1p/6p1/8/3p2K1/1Q4P1/1P3P1q/2r5 b - - 0 1 & Qh5+ Kf4 Qf5# & black
+r1b1k1n1/pp1np1b1/1qp5/3p1pN1/3P4/2N1P3/PPP2PP1/R2QKB2 w Qq - 0 1 & Qh5+ Kd8 Ne6# & white
+5rk1/2N2ppp/8/8/5qn1/Q7/5PPP/4R1K1 w - - 0 1 & Qxf8+ Kxf8 Re8# & white
+5rkr/3q1pb1/4nQp1/8/4N3/8/1B3PPP/4R1K1 w - - 0 1 & Qxg7+ Nxg7 Nf6# & white
+rnb1k1nr/pppp1ppp/3b4/4q3/8/2N2NP1/PPPPP2P/R1BQKB1R b KQkq - 0 1 & Qxg3+ hxg3 Bxg3# & black
+k1r2Q2/pp6/4q3/8/2Nn4/1P4B1/5PPP/6K1 w - - 0 1 & Nb6+ axb6 Qa3# & white
+1k6/2p1R3/1p3np1/pN5b/7Q/8/2r2qB1/7K w - - 0 1 & Re8+ Nxe8 Qd8# & white
+r1bqk1nr/ppp2pQp/4p3/8/3np3/P1N5/1PP2PPP/R1B1KB1R b KQkq - 0 1 & Nxc2+ Ke2 Qd3# & black

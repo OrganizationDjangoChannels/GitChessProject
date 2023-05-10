@@ -22,14 +22,17 @@ DEFAULT_PUZZLE_RATING = 1000
 DEFAULT_USERS = ""
 
 filenames = [
+    'checkmate_in_1.txt',
     'checkmate_in_2.txt',
+    'checkmate_in_3.txt',
+    'checkmate_in_4.txt',
     'hard_puzzles.txt',
 ]
 # the order of filenames defines the order of puzzles in the database
 
 
 def main():
-    id = 1
+    field_id = 1
     for filename in filenames:
 
         with open(path_to_puzzles + filename, "r") as file:
@@ -40,7 +43,7 @@ def main():
                 puzzle_token = token_urlsafe(16)
                 fen, moves, board_orientation = stripped_line.split(' & ')
 
-                values = (id, puzzle_token, fen, moves, DEFAULT_PUZZLE_RATING, board_orientation, DEFAULT_USERS)
+                values = (field_id, puzzle_token, fen, moves, DEFAULT_PUZZLE_RATING, board_orientation, DEFAULT_USERS)
                 insert_query = 'INSERT INTO public."ChessChannelsApp_puzzle"\
                 (id, token, fens, moves, puzzle_rating, board_orientation, users)\
                  VALUES (%s, %s, %s, %s, %s, %s, %s);'
@@ -48,7 +51,7 @@ def main():
                 cur.execute(insert_query, values)
                 connection.commit()
 
-                id += 1
+                field_id += 1
 
     cur.close()
     connection.close()
