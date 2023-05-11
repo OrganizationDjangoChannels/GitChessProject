@@ -5,22 +5,158 @@
 <head>
     <meta charset="UTF-8">
     <title>{{title}}</title>
+
+    {% block styles %}
+    <link href="{% static 'ChessChannelsApp/css/styles.css' %}" rel="stylesheet">
+    <style>
+
+        .PuzzleLinkElement{
+            text-decoration: none;
+            color: #cfcef2;
+            padding: 10px 10px 10px 10px;
+            font-size: 24px;
+            background-color: #110b14;
+
+        }
+
+        .PuzzleLinkElement:hover{
+            color: #fbff00;
+        }
+
+
+
+        .PuzzleContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            background-color: #292e36;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .MainPuzzleContainer {
+            text-align: center;
+            background-color: #242623;
+            margin-top: 40px;
+            height: auto;
+            width: auto;
+
+        }
+
+        .PuzzleLabel{
+            padding: 20px;
+            color: white;
+            font-size: 35px;
+            vertical-align: middle;
+
+        }
+
+        .img-triangle{
+            max-width: 40px;
+            max-height: 40px;
+            vertical-align: middle;
+            padding-left: 10px;
+            margin: 10px;
+
+        }
+    </style>
+    {% endblock styles %}
+
+    {% block before_body_scripts %}
+
+
+    {% endblock before_body_scripts %}
 </head>
 <body>
-    {% block main_content %}
-    <div id="checkmate_in_1_div">
 
+    {% block main_content %}
+    <div id="checkmate_puzzles_category" class="MainPuzzleContainer">
+
+        <!--Checkmate in 1 move-->
+        <div class="PuzzleLabel">Checkmate in 1 move
+            <img src="{% static 'ChessChannelsApp/images/triangle.png' %}" alt="alternative text" class="img-triangle"
+            onclick="triangle_onclick_func(1)">
+        </div>
+        <div id="checkmate_in_1_div" class="PuzzleContainer" style="display: none;">
+            {% for key, value in checkmate_in_1.items %}
+                <a href="/puzzle/{{value}}" class="PuzzleLinkElement">
+                    {{key}}
+                </a>
+            {% endfor %}
+        </div>
+
+        <!--Checkmate in 2 moves-->
+        <div class="PuzzleLabel">Checkmate in 2 moves
+            <img src="{% static 'ChessChannelsApp/images/triangle.png' %}" alt="alternative text" class="img-triangle"
+            onclick="triangle_onclick_func(2)">
+        </div>
+        <div id="checkmate_in_2_div" class="PuzzleContainer" style="display: none;">
+            {% for key, value in checkmate_in_2.items %}
+                <a href="/puzzle/{{value}}" class="PuzzleLinkElement">
+                    {{key}}
+                </a>
+            {% endfor %}
+        </div>
+
+        <!--Checkmate in 3 moves-->
+        <div class="PuzzleLabel">Checkmate in 3 moves
+            <img src="{% static 'ChessChannelsApp/images/triangle.png' %}" alt="alternative text" class="img-triangle"
+            onclick="triangle_onclick_func(3)">
+        </div>
+        <div id="checkmate_in_3_div" class="PuzzleContainer" style="display: none;">
+            {% for key, value in checkmate_in_3.items %}
+                <a href="/puzzle/{{value}}" class="PuzzleLinkElement">
+                    {{key}}
+                </a>
+            {% endfor %}
+        </div>
+
+        <!--Checkmate in 4 moves-->
+        <div class="PuzzleLabel">Checkmate in 4 moves
+            <img src="{% static 'ChessChannelsApp/images/triangle.png' %}" alt="alternative text" class="img-triangle"
+            onclick="triangle_onclick_func(4)">
+        </div>
+        <div id="checkmate_in_4_div" class="PuzzleContainer" style="display: none;">
+            {% for key, value in checkmate_in_4.items %}
+                <a href="/puzzle/{{value}}" class="PuzzleLinkElement">
+                    {{key}}
+                </a>
+            {% endfor %}
+        </div>
 
     </div>
-    <div style="color: white">Ratings</div>
-    <div>Text</div>
+
+    <div style="color: white">Puzzles</div>
+
+
+
+
+    <div style="color: white">{{checkmate_in_1.1}}</div>
+    <div style="color: white">{{checkmate_in_1.2}}</div>
+
     {% endblock main_content %}
 
 
     {% block after_body_scripts %}
     <script>
+
+
         let title = "{{title}}";
-        console.log(title);
+        let puzzles = "{{puzzle_id_2}}";
+        console.log(puzzles);
+
+
+        function triangle_onclick_func(arg){
+            let showable = document.getElementById(`checkmate_in_${arg}_div`);
+
+            if (showable.style.display === "none"){
+                showable.style.display = "inline";
+            }
+            else{
+                showable.style.display = "none";
+            }
+        }
+
     </script>
 
     <script src="{% static 'ChessChannelsApp/js/puzzles.js' %}"></script>

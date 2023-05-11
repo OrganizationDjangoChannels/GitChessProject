@@ -43,6 +43,12 @@
 
 
     <script>
+        let authenticated = ("{{request.user.is_authenticated}}" === "True")
+
+        if (!authenticated){
+            window.location.replace("{% url 'login' %}");  // redirect to login page
+        }
+
         let token = "{{puzzle.token}}";
         let fen = "{{puzzle.fens}}";
         let moves = "{{puzzle.moves}}";

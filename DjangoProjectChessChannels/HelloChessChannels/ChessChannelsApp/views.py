@@ -2,12 +2,14 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import Http404
 from django.core import serializers
+from django.core.serializers.json import DjangoJSONEncoder
 from secrets import token_urlsafe
 
 from .forms import *
 from .models import *
 from django.contrib.auth import authenticate, login, logout
 import re
+import json
 
 
 # Create your views here.
@@ -44,10 +46,7 @@ def play(request, game_number=1):
         print(f'game {game.token}')
         chat_messages = ChatMessages.objects.filter(token=game_number).order_by('-id')
         print(chat_messages.query)
-        # for chat_message in chat_messages:
-        #     print(f'{chat_message.id} {chat_message.username}: {chat_message.message}')
 
-        chat_messages_json = serializers.serialize("json", chat_messages)
     except Game.DoesNotExist:
         raise Http404
 
@@ -76,20 +75,61 @@ def ratings(request):
 
 def puzzles(request):
     data = {'title': 'puzzles'}
-    puzzles_dict = dict()
+    checkmate_in_1_dict = dict()
+    checkmate_in_2_dict = dict()
+    checkmate_in_3_dict = dict()
+    checkmate_in_4_dict = dict()
 
+    # checkmate_in_1
     try:
-        puzzles = Puzzle.objects.all()
-        for puzzle in puzzles:
+        puzzles_checkmate_in_1 = Puzzle.objects.filter(id__lte=10)  # id <= 10
+        counter = 0
+        for puzzle in puzzles_checkmate_in_1:
+            counter += 1
+            checkmate_in_1_dict[counter] = puzzle.token
 
-            puzzles_dict[str(puzzle.id)] = puzzle
-            # print(puzzle.token)
     except Puzzle.DoesNotExist:
         raise Http404
 
+    # checkmate_in_2
+    try:
+        puzzles_checkmate_in_2 = Puzzle.objects.filter(id__gte=11, id__lte=30)  # 11 <= id <= 30
+        counter = 0
+        for puzzle in puzzles_checkmate_in_2:
+            counter += 1
+            checkmate_in_2_dict[counter] = puzzle.token
 
-    data['puzzles'] = puzzles_dict
-    return render(request, 'ChessChannelsApp/ratings.html', context=data)
+    except Puzzle.DoesNotExist:
+        raise Http404
+
+    # checkmate_in_3
+    try:
+        puzzles_checkmate_in_3 = Puzzle.objects.filter(id__gte=31, id__lte=50)  # 31 <= id <= 50
+        counter = 0
+        for puzzle in puzzles_checkmate_in_3:
+            counter += 1
+            checkmate_in_3_dict[counter] = puzzle.token
+
+    except Puzzle.DoesNotExist:
+        raise Http404
+
+    # checkmate_in_4
+    try:
+        puzzles_checkmate_in_4 = Puzzle.objects.filter(id__gte=51, id__lte=70)  # 31 <= id <= 50
+        counter = 0
+        for puzzle in puzzles_checkmate_in_4:
+            counter += 1
+            checkmate_in_4_dict[counter] = puzzle.token
+
+    except Puzzle.DoesNotExist:
+        raise Http404
+
+    data["checkmate_in_1"] = checkmate_in_1_dict
+    data["checkmate_in_2"] = checkmate_in_2_dict
+    data["checkmate_in_3"] = checkmate_in_3_dict
+    data["checkmate_in_4"] = checkmate_in_4_dict
+
+    return render(request, 'ChessChannelsApp/puzzles.html', context=data)
 
 
 def profile(request, username='undefined'):
