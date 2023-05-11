@@ -7,11 +7,25 @@
     <title>{{title}}</title>
 </head>
 <body>
-  {% block main_content %}
-    <div>
-        <a href="{% url 'home' %}">Return on main.html</a>
+    {% block main_content %}
+    <div id="checkmate_in_1_div">
+
+
     </div>
-    <div>Ratings</div>
-  {% endblock main_content %}
+    <div style="color: white">Ratings</div>
+    <div>Text</div>
+    {% endblock main_content %}
+
+
+    {% block after_body_scripts %}
+    <script>
+        let title = "{{title}}";
+        console.log(title);
+    </script>
+
+    <script src="{% static 'ChessChannelsApp/js/puzzles.js' %}"></script>
+
+
+    {% endblock after_body_scripts %}
 </body>
 </html>

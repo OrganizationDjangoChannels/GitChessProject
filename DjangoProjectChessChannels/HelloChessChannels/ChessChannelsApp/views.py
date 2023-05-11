@@ -76,6 +76,19 @@ def ratings(request):
 
 def puzzles(request):
     data = {'title': 'puzzles'}
+    puzzles_dict = dict()
+
+    try:
+        puzzles = Puzzle.objects.all()
+        for puzzle in puzzles:
+
+            puzzles_dict[str(puzzle.id)] = puzzle
+            # print(puzzle.token)
+    except Puzzle.DoesNotExist:
+        raise Http404
+
+
+    data['puzzles'] = puzzles_dict
     return render(request, 'ChessChannelsApp/ratings.html', context=data)
 
 
