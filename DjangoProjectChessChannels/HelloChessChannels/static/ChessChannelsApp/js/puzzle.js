@@ -71,7 +71,22 @@ function onDrop (source, target, piece) {
         board.position(game.fen());
     }
 
+
+
     chessmove_audio.play();
+
+    console.log(`move_index = ${move_index}`);
+    if (move_index > moves_array.length){
+        console.log("puzzle was solved.");
+        let solution_label_div = document.getElementById("solution_label_id");
+        solution_label_div.innerText = "You have solved this puzzle.";
+        PuzzleSocket.send(JSON.stringify({
+                        'type': 'solution',
+                        'username': current_username,
+                        'token': token,
+                    }));
+    }
+
 
 
 }

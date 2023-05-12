@@ -13,6 +13,27 @@
     <link href="{% static 'ChessChannelsApp/css/animations.css' %}" rel="stylesheet">
     <link href="{% static 'ChessChannelsApp/css/chessboard-1.0.0.css' %}" rel="stylesheet">
 
+    <style>
+        .myBoard_flexbox_container{
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: column;
+            align-items: center;
+
+            justify-content: center;
+            padding: 10px 10px 10px 10px;
+        }
+
+        .SolutionLabel{
+            color: #6bb072;
+            font-size: 25px;
+            text-align: center;
+            width: auto;
+            height: auto;
+            margin: 10px 20px 20px 20px;
+        }
+    </style>
+
     {% endblock styles %}
 
     {% block before_body_scripts %}
@@ -32,11 +53,12 @@
 
 
     {% block main_content %}
-        <div style="padding: 30px 50px 30px 50px;">
-            Puzzles
-        </div>
 
-        <div id="myBoard" style="width: 500px"></div>
+
+        <div class="myBoard_flexbox_container">
+            <div class="SolutionLabel" id="solution_label_id">Solve this puzzle.</div>
+            <div id="myBoard" style="width: 500px"></div>
+        </div>
     {% endblock main_content %}
 
     {% block after_body_scripts %}
@@ -53,6 +75,7 @@
         let fen = "{{puzzle.fens}}";
         let moves = "{{puzzle.moves}}";
         let board_orientation_loaded = "{{puzzle.board_orientation}}";
+        let current_username = "{{user.username}}";
 
         let moves_array = moves.split(" ");
         let move_index = 0;

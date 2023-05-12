@@ -15,9 +15,21 @@
             font-size: 20px;
             background-color: green;
             border-radius: 12px;
-            max-width: 100px;
-            user-select: none;
+            max-width: 400px;
+            max-height: 200px;
+            min-width: 200px;
 
+            user-select: none;
+            text-align: center;
+            vertical-align: middle;
+
+        }
+
+        .ButtonContainer{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin: auto;
         }
         /*.just_play_button:active{*/
         /*    background-color: darkblue;*/
@@ -34,38 +46,84 @@
 <body>
     {% block main_content %}
     <div style="color: white; font-size: 30px; padding-top: 20px;">
-        There will be content...
+        &nbsp;
     </div>
 
-    <div style="padding: 20px 20px 20px 20px;">
-        <div class="just_play_button" id="5_plus_3">
-            PLAY 5+3
+    <div class="ButtonContainer">
+        <div style="padding: 20px 20px 20px 20px;">
+            <div class="just_play_button" id="5_plus_3">
+                PLAY 5+3
+            </div>
+        </div>
+
+        <div style="padding: 20px 20px 20px 20px;">
+            <div class="just_play_button" id="3_plus_2">
+                PLAY 3+2
+            </div>
+        </div>
+
+        <div style="padding: 20px 20px 20px 20px;">
+            <div class="just_play_button" id="1_plus_1">
+                PLAY 1+1
+            </div>
+        </div>
+
+        <div style="padding: 20px 20px 20px 20px;">
+            <div class="just_play_button" id="3_plus_0">
+                PLAY 3+0
+            </div>
+        </div>
+
+        <div style="padding: 20px 20px 20px 20px;">
+            <div class="just_play_button" id="5_plus_0">
+                PLAY 5+0
+            </div>
+        </div>
+
+        <div style="padding: 20px 20px 20px 20px;">
+            <div class="just_play_button" id="10_plus_0">
+                PLAY 10+0
+            </div>
+        </div>
+
+        <div style="padding: 20px 20px 20px 20px;">
+            <div class="just_play_button" id="10_plus_5">
+                PLAY 10+5
+            </div>
+        </div>
+
+        <div style="padding: 20px 20px 20px 20px;">
+            <div class="just_play_button" id="15_plus_0">
+                PLAY 15+0
+            </div>
+        </div>
+
+        <div style="padding: 20px 20px 20px 20px;">
+            <div class="just_play_button" id="30_plus_0">
+                PLAY 30+0
+            </div>
+        </div>
+
+        <div style="padding: 20px 20px 20px 20px;">
+            <div class="just_play_button" id="30_plus_20">
+                PLAY 30+20
+            </div>
+        </div>
+
+        <div style="padding: 20px 20px 20px 20px;">
+            <div class="just_play_button" id="90_plus_0">
+                PLAY 90+0
+            </div>
+        </div>
+
+        <div style="padding: 20px 20px 20px 20px;">
+            <div class="just_play_button" id="90_plus_30">
+                PLAY 90+30
+            </div>
         </div>
     </div>
 
-    <div style="padding: 20px 20px 20px 20px;">
-        <div class="just_play_button" id="3_plus_2">
-            PLAY 3+2
-        </div>
-    </div>
 
-    <div style="padding: 20px 20px 20px 20px;">
-        <div class="just_play_button" id="1_plus_1">
-            PLAY 1+1
-        </div>
-    </div>
-
-    <div style="padding: 20px 20px 20px 20px;">
-        <div class="just_play_button" id="3_plus_0">
-            PLAY 3+0
-        </div>
-    </div>
-
-    <div style="padding: 20px 20px 20px 20px;">
-        <div class="just_play_button" id="5_plus_0">
-            PLAY 5+0
-        </div>
-    </div>
 
 
     {% endblock main_content %}

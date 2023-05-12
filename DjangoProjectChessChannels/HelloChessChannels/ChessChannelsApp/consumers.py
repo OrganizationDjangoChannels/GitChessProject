@@ -10,7 +10,8 @@ from threading import Timer
 from .models import *
 
 players_searching_set = set()
-players_searching_dict = {'5+3': set(), '3+2': set(), '1+1': set(), '3+0': set(), '5+0': set(), }
+players_searching_dict = {'5+3': set(), '3+2': set(), '1+1': set(), '3+0': set(), '5+0': set(), '10+0': set(),
+                          '10+5': set(), '15+0': set(), '30+0': set(), '30+20': set(), '90+0': set(), '90+30': set(),}
 players_pairs = {}
 play_connected_usernames_dict = dict()    # {token: set(), }
 game_modes = ['bullet', 'blitz', 'rapid', 'classical', 'user_mode']
@@ -117,10 +118,10 @@ async def simple_matchmaking(server):  # temporary
                 print(players_pairs)
 
                 play_connected_usernames_dict[game_token] = set()
-
-                white_full_time = int(key[0]) * 60 * 1000  # time control
-                black_full_time = int(key[0]) * 60 * 1000  # time control
-                increment = int(key[2]) * 1000  # increment
+                key_parsed = key.split("+")
+                white_full_time = int(key_parsed[0]) * 60 * 1000  # time control
+                black_full_time = int(key_parsed[0]) * 60 * 1000  # time control
+                increment = int(key_parsed[1]) * 1000  # increment
 
                 # supposed that white_full_time = black_full_time
                 if 0 < white_full_time < 1 * 60 * 1000 + 1 * 1000:
@@ -561,8 +562,24 @@ class PuzzleConsumer(WebsocketConsumer):
     def disconnect(self, code):
         print(f'{self.user} was disconnected with code {code}')
 
-
     def receive(self, text_data=None, bytes_data=None):
-        pass
+        text_data_json = json.loads(text_data)
+        type = text_data_json['type']
+
+        if type == "solution":
+            splitter = " & "
+            username = text_data_json['username']
+            token = text_data_json['token']
+            try:
+                puzzle = Puzzle.objects.get(token=token)
+                usernames_set = set(puzzle.users.split(splitter))
+                if username not in usernames_set:
+                    puzzle.users = puzzle.users + username + splitter
+                    puzzle.save(update_fields=['users'])
+            except Puzzle.DoesNotExist:
+                pass
+
+
+
 
 

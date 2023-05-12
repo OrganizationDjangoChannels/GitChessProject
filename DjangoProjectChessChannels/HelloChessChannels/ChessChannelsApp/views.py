@@ -8,6 +8,7 @@ from secrets import token_urlsafe
 from .forms import *
 from .models import *
 from django.contrib.auth import authenticate, login, logout
+from django.template.defaulttags import register
 import re
 import json
 
@@ -17,6 +18,10 @@ username_pattern = re.compile(r'^[A-Za-z0-9_-]{6,20}$')
 # password_pattern = re.compile(r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
 email_pattern = re.compile("^[a-zA-z0-9\.\-_]+@{1}[a-zA-Z0-9]+\.{1}[a-zA-Z]{2,3}$")
 
+
+@register.filter(name="get_value_from_dict")
+def get_value_from_dict(dictionary, key):
+    return dictionary.get(key)
 
 
 def show_puzzle(request, puzzle_number=1):
@@ -74,52 +79,77 @@ def ratings(request):
 
 
 def puzzles(request):
+    splitter = " & "
     data = {'title': 'puzzles'}
     checkmate_in_1_dict = dict()
     checkmate_in_2_dict = dict()
     checkmate_in_3_dict = dict()
     checkmate_in_4_dict = dict()
+    checkmate_in_1_dict_users = dict()
+    checkmate_in_2_dict_users = dict()
+    checkmate_in_3_dict_users = dict()
+    checkmate_in_4_dict_users = dict()
 
     # checkmate_in_1
     try:
-        puzzles_checkmate_in_1 = Puzzle.objects.filter(id__lte=10)  # id <= 10
+        puzzles_checkmate_in_1 = Puzzle.objects.filter(id__lte=10).order_by('id')  # id <= 10
         counter = 0
         for puzzle in puzzles_checkmate_in_1:
             counter += 1
             checkmate_in_1_dict[counter] = puzzle.token
+            users_parsed = puzzle.users.split(splitter)
+            if users_parsed:
+                checkmate_in_1_dict_users[counter] = set(users_parsed)
+            else:
+                checkmate_in_1_dict_users[counter] = set()
 
     except Puzzle.DoesNotExist:
         raise Http404
 
     # checkmate_in_2
     try:
-        puzzles_checkmate_in_2 = Puzzle.objects.filter(id__gte=11, id__lte=30)  # 11 <= id <= 30
+        puzzles_checkmate_in_2 = Puzzle.objects.filter(id__gte=11, id__lte=30).order_by('id')  # 11 <= id <= 30
         counter = 0
         for puzzle in puzzles_checkmate_in_2:
             counter += 1
             checkmate_in_2_dict[counter] = puzzle.token
+            users_parsed = puzzle.users.split(splitter)
+            if users_parsed:
+                checkmate_in_2_dict_users[counter] = set(users_parsed)
+            else:
+                checkmate_in_2_dict_users[counter] = set()
 
     except Puzzle.DoesNotExist:
         raise Http404
 
     # checkmate_in_3
     try:
-        puzzles_checkmate_in_3 = Puzzle.objects.filter(id__gte=31, id__lte=50)  # 31 <= id <= 50
+        puzzles_checkmate_in_3 = Puzzle.objects.filter(id__gte=31, id__lte=50).order_by('id')  # 31 <= id <= 50
         counter = 0
         for puzzle in puzzles_checkmate_in_3:
             counter += 1
             checkmate_in_3_dict[counter] = puzzle.token
+            users_parsed = puzzle.users.split(splitter)
+            if users_parsed:
+                checkmate_in_3_dict_users[counter] = set(users_parsed)
+            else:
+                checkmate_in_3_dict_users[counter] = set()
 
     except Puzzle.DoesNotExist:
         raise Http404
 
     # checkmate_in_4
     try:
-        puzzles_checkmate_in_4 = Puzzle.objects.filter(id__gte=51, id__lte=70)  # 31 <= id <= 50
+        puzzles_checkmate_in_4 = Puzzle.objects.filter(id__gte=51, id__lte=70).order_by('id')  # 31 <= id <= 50
         counter = 0
         for puzzle in puzzles_checkmate_in_4:
             counter += 1
             checkmate_in_4_dict[counter] = puzzle.token
+            users_parsed = puzzle.users.split(splitter)
+            if users_parsed:
+                checkmate_in_4_dict_users[counter] = set(users_parsed)
+            else:
+                checkmate_in_4_dict_users[counter] = set()
 
     except Puzzle.DoesNotExist:
         raise Http404
@@ -128,7 +158,11 @@ def puzzles(request):
     data["checkmate_in_2"] = checkmate_in_2_dict
     data["checkmate_in_3"] = checkmate_in_3_dict
     data["checkmate_in_4"] = checkmate_in_4_dict
-
+    data["checkmate_in_1_users"] = checkmate_in_1_dict_users
+    data["checkmate_in_2_users"] = checkmate_in_2_dict_users
+    data["checkmate_in_3_users"] = checkmate_in_3_dict_users
+    data["checkmate_in_4_users"] = checkmate_in_4_dict_users
+    print(data["checkmate_in_1_users"])
     return render(request, 'ChessChannelsApp/puzzles.html', context=data)
 
 
